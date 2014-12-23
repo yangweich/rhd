@@ -1,0 +1,16 @@
+#!/bin/bash
+echo "teensy load og hex file"
+
+#sage: teensy_loader_cli -mmcu=<MCU> [-w] [-h] [-n] [-v] <file.hex>
+#        -w : Wait for device to appear
+#        -r : Use hard reboot if device not online
+#        -n : No reboot after programming
+#        -v : Verbose output#
+#
+#<MCU> = atmega32u4 | at90usb162 | at90usb646 | at90usb1286 | mk20dx128#
+#
+#For more information, please visit:
+#http://www.pjrc.com/teensy/loader_cli.html
+
+teensy_loader_cli -mmcu=at90usb1286 -v -w greenuc.hex
+

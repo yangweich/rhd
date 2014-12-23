@@ -1,0 +1,5 @@
+<!-- VectorNav VN-100 - Serial connection -->
+	<vn100  enable="true" lib="libvn100.so.1" critical="false">
+		<serial port="/dev/ttyS1" baudrate="115200" />
+		<output regid="[0-48]" />< !--50 is default, not to chang the output-->
+	</vn100> 	

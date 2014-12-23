@@ -1,0 +1,42 @@
+This plugin is for the Phidget 4-channel bridge amplifier, and is intended for a general implementation of the Phidgets Bridge.
+
+
+It requires that the phidget linux library is installed - see 
+
+http://www.phidgets.com/docs/OS_-_Linux
+
+unpack the libphidget_2.1.8.20140319.tar.gz (or download a newer version)
+
+$ tar -xzf libphidget_2.1.8.20140319.tar.gz
+$ cd libphidget_2.1.8.20140319
+$ ./configure
+
+In the produced Makefile you may edit the install prefix (line 478):
+change 'prefix = /usr' to 'prefix = /usr/local'
+
+then:
+$ make
+$ sudo make install
+
+The following files are installed:
+
+/usr/local/lib:
+libphidget21.a  
+libphidget21.la  
+libphidget21.so      -> libphidget21.so.0.0.0
+libphidget21.so.0    -> libphidget21.so.0.0.0
+libphidget21.so.0.0.0
+
+/usr/local/include
+phidget21.h
+
+/usr/local/lib/pkgconfig
+libphidget21.pc
+
+UDEV rules '99-phidgets.rules' may need to be copied to udev rules
+sudo cp 99-phidgets.rules /etc/udev/rules.d/
+
+Christian 7 aug 2014
+
+Update:
+Peter Savnik 5 dec 2014

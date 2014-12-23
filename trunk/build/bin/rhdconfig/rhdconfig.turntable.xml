@@ -1,0 +1,91 @@
+<?xml version="1.0" ?>
+<!--
+    Configuration file for 
+    Robot Hardware Daemon
+
+    This configuration is for the AU turntable
+
+    $Id: rhdconfig.smr.xml 337 2009-01-20 16:04:46Z lvm $
+-->
+<!-- Starting RHD Configuration -->
+<rhd>
+  <!-- *** Core Components Configuration *** -->
+  <!-- Sheduler configuration -->
+  <sheduler>
+    <period value="10000"/><!--in usec-->
+    <type value="itimer"/><!--"usleep","itimer","LXRT" -->
+    <realtimepriority enable="false"/> <!-- Enable use of RHD without root-priviliges in non-realtime (NOT for RTAI!)-->
+  </sheduler>
+  <!-- Server configuration -->
+  <server>
+    <port value="24902"/>
+    <clients number="10"/>
+  </server>
+	
+	
+  <!-- *** Plugins Configuration *** -->
+	<plugins basepath="/usr/local/smr/lib/rhdplugin/">
+    <!-- gdm8246 enable="true"
+          lib="libgdm8246.so.1" plugin library
+          critical="false"      should RHD stop if no device
+          dev="/dev/ttyUSB0"    device name
+          baudrate="9600"       baudrate for serial port - instrument is default 9600
+          sampleRate="2.0"      sample rate for measurements in Hz (max is 3-4 Hz)
+          valName="gdm1"        name of measured value from instrument in RHD (MRC)
+          debug="0"             if debug, then more print to screen and log to file -->
+    <!-- gdm8246 enable="true"
+          lib="libgdm8246.so.1"
+          critical="false"
+          dev="/dev/ttyUSB0"
+          baudrate="9600"
+          sampleRate="2"
+          valName="rudder"
+          debug="0">
+    </gdm8246-->		<!-- Automation serial bus driver -->
+	<bupi enable="false"
+          lib="libbupii2c.so.1"
+          critical="false"
+          dev="/dev/ttyUSB0"
+          baudrate="115200"
+          valName="jefa"
+          debug="0">
+  </bupi>
+  <bupiad enable="true"
+          lib="libbupiad.so.1"
+          critical="false"
+          dev="/dev/ttyUSB0"
+          baudrate="115200"
+          valName="ad"
+          debug="0">
+  </bupiad>
+
+		<auserial enable="false" lib="libauserial.so.1" critical="true">
+			<bus name="RS485" dev="/dev/ttyS0" baudrate="115200" holdoff="6">
+			<!-- Yaw motor module -->
+			<device name="motoryaw" id="1">
+				<cmd type="request" name="reset" cmd="0">
+					<variable name="resetyaw" dir="w" />
+				</cmd>
+				<cmd type="request" name="speed" cmd="1">
+					<variable name="speedyaw" dir="w" byte0="0"/>
+				</cmd>
+				<cmd type="poll" name="enclReq" cmd="2" pad="5"/>
+				<cmd type="request" name="enclRet" cmd="A">
+					<variable name="encyaw" dir="r" byte0="1" byte1="0" signed="true"/>
+					<variable name="motorstatusyaw" dir="r" byte0="2"/>
+					<variable name="pwmyaw" dir="r" byte0="3"/>
+				</cmd>
+				<cmd type="request" name="setP" cmd="7">
+					<variable name="setpyaw" dir="w" byte0="0"/>
+				</cmd>
+				<cmd type="request" name="setI" cmd="8">
+					<variable name="setiyaw" dir="w" byte0="0"/>
+				</cmd>
+				<cmd type="request" name="resetPI" cmd="9">
+					<variable name="resetpiyaw" dir="w"/>
+				</cmd>
+			</device>
+			</bus>
+		</auserial>
+	</plugins>
+</rhd>

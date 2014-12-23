@@ -1,0 +1,36 @@
+<?xml version="1.0" ?>
+<!--
+    Configuration file for 
+    Robot Hardware Daemon
+
+    This configuration is for the
+		iRobot ATRV-Jr research robot
+
+    $Id: rhdconfig.atrvjr.xml 160 2008-10-20 14:01:21Z s021786 $
+-->
+<!-- Starting RHD Configuration -->
+<rhd>
+  <!-- *** Core Components Configuration *** -->
+  <!-- Sheduler configuration -->
+  <sheduler>
+    <period value="25000"/><!--in usec-->
+    <type value="LXRT"/><!--"usleep","itimer","LXRT" -->
+  </sheduler>
+  <!-- Server configuration -->
+  <server>
+    <port value="24902"/>
+    <clients number="10"/>
+  </server>
+	
+  <!-- *** Plugins Configuration *** -->
+	<plugins basepath="/usr/local/smr/lib/rhdplugin/">
+		<!-- rFLEX driver for iRobot research robots -->
+		<rflex enable="true" lib="librflex.so.1" critical="true">
+			<serial port="/dev/ttyS0" baudrate="115200" />
+			<odometry period="1000" />
+			<translation accel="100000" torque="30000" />
+			<rotation accel="100000" torque="35000" />
+			<bumperbrake default="true" />
+		</rflex>
+	</plugins>
+</rhd>

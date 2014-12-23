@@ -1,0 +1,8 @@
+<!-- RoboTeq Motor Controller - Serial connection -->
+	<rtq  enable="true" lib="librtq.so.1" critical="false">
+		<serial portleft="/dev/ttyS1"/>
+		<serial portright="/dev/ttyS0"/>
+		<var leftinvert="false" /> <!--If the motors face in opposite directions one of these - the right - should be true -->
+		<var rightinvert="false" />
+		<encoder readtype="abs " /><!-- asb=absolute,rel=relative; Depending on the "control" parameter in <odometry> in robot.conf file. If 0 -> abs; else -> rel -->
+	</rtq> 	

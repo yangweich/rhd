@@ -1,0 +1,35 @@
+<?xml version="1.0" ?>
+<!--
+    Configuration file for 
+    Robot Hardware Daemon
+
+    This configuration is for the
+		iRobot ATRV-Jr research robot
+
+    $Id: rhdconfig.joy.xml 1639 2011-07-13 10:11:12Z abb $
+-->
+<!-- Starting RHD Configuration -->
+<rhd>
+  <!-- *** Core Components Configuration *** -->
+  <!-- Sheduler configuration -->
+  <sheduler>
+    <period value="25000"/><!--in usec-->
+    <type value="LXRT"/><!--"usleep","itimer","LXRT" -->
+  </sheduler>
+  <!-- Server configuration -->
+  <server>
+    <port value="24902"/>
+    <clients number="10"/>
+  </server>
+	
+  <!-- *** Plugins Configuration *** -->
+	<plugins basepath="/home/anbb/rse/rhd/trunk/build/lib/rhdplugin/">
+		<!-- Joystick Control -->
+		<joycontrol enable="true" lib="libjoycontrol.so.1" critical="true" safety="1">
+			<joystick port="/dev/input/js0"/>
+			<speed maxfwd="30" maxturn="15"/>
+			<deadband max="767" min="-767"/>
+			<control enable="false"/>
+		</joycontrol>
+	</plugins>
+</rhd>

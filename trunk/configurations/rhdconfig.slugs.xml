@@ -1,0 +1,31 @@
+<?xml version="1.0" ?>
+<!--
+    Configuration file for 
+    Robot Hardware Daemon
+
+    See something else for configuration description
+
+    $Id: rhdconfig.slugs.xml 139 2008-10-09 09:52:09Z s021786 $
+-->
+<!-- Starting RHD Configuration -->
+<rhd>
+  <!-- *** Core Components Configuration *** -->
+  <!-- Sheduler configuration -->
+  <sheduler>
+    <period value="10000"/><!--in usec-->
+    <type value="itimer"/><!--"usleep","itimer","LXRT" -->
+  </sheduler>
+  <!-- Server configuration -->
+  <server>
+    <port value="24902"/>
+    <clients number="10"/>
+  </server>
+
+  <!-- *** Plugins Configuration *** -->
+	<plugins basepath="../lib/rhdplugin/">
+		<!-- SLUGS serial module -->
+		<slugs enable="true" lib="libslugs.so.1" critical="false">
+			<serial port="/dev/ttyS0" baudrate="115200"/>
+		</slugs>
+	</plugins>
+</rhd>

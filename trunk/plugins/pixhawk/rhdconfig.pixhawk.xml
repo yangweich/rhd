@@ -1,0 +1,39 @@
+<?xml version="1.0" ?>
+<!--
+    Configuration file for 
+    Robot Hardware Daemon
+
+    This configuration is for the pixhawk
+
+    $Id: rhdconfig.smr.xml 337 2009-01-20 16:04:46Z lvm $
+-->
+<!-- Starting RHD Configuration -->
+<rhd>
+  <!-- *** Core Components Configuration *** -->
+  <!-- Sheduler configuration -->
+  <sheduler>
+    <period value="10000"/><!--in usec-->
+    <type value="itimer"/><!--"usleep","itimer","LXRT" -->
+    <realtimepriority enable="false"/> <!-- Enable use of RHD without root-priviliges in non-realtime (NOT for RTAI!)-->
+  </sheduler>
+  <!-- Server configuration -->
+  <server>
+    <port value="24902"/>
+    <clients number="10"/>
+  </server>
+	
+	
+  <!-- *** Plugins Configuration *** -->
+	<plugins basepath="/home/sh/mobotware/rhd/trunk/build/lib/rhdplugin/">
+	  <pixhawk enable="true" lib="libpixhawk.so.1" critical="false" safety="0">
+            <serial port="/dev/ttyACM0" baudrate="115200" />
+	  </pixhawk>
+	<rhdlog enable="true"
+                  lib="rhdlog.so.1"
+                  critical="false"
+                  interval="1"
+                  safety="2"
+                  debug="0">
+              </rhdlog>
+        </plugins>
+</rhd>

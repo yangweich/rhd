@@ -1,0 +1,40 @@
+<?xml version="1.0" ?>
+<!--
+    Configuration file for 
+    Robot Hardware Daemon
+
+    This configuration is for the AU SMR
+
+    $Id: rhdconfig.empty.xml 1639 2011-07-13 10:11:12Z abb $
+-->
+<!-- Starting RHD Configuration -->
+<rhd>
+  <!-- *** Core Components Configuration *** -->
+  <!-- Sheduler configuration -->
+  <scheduler>
+    <period value="5000"/><!--in usec-->
+    <type value="itimer"/><!--"usleep","itimer","LXRT" -->
+    <realtimepriority enable="false"/> <!-- Enable use of RHD without root-priviliges in non-realtime (NOT for RTAI!)-->
+  </scheduler>
+  <!-- Server configuration -->
+  <server>
+    <port value="24902"/>
+    <clients number="10"/>
+  </server>
+	
+  <!-- *** Plugins Configuration *** -->
+	<plugins basepath="/usr/local/smr/lib/rhdplugin/">
+        <!-- rhdlog will open a file rhdlog.txt and write all symbol values here as fast as possible is 
+             it can not keep up writeing with the tick interval specified (can be changed online) 
+             interval = 0 for no log.
+             File is created in default directory.
+             After each write operation the data is flushed to disk (using fflush()). 
+             each line starts with a unix timestamp (gettimeofday) - set at tick call -->
+	<rhdlog enable="true"
+          lib="rhdlog.so.1"
+          critical="false"
+          interval="3"
+          debug="0">
+      </rhdlog>
+	</plugins>
+</rhd>

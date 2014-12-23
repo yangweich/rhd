@@ -1,0 +1,129 @@
+<?xml version="1.0" ?>
+<!--
+    Configuration file for 
+    Robot Hardware Daemon
+
+    This configuration is for the BOB Cleaner Robot
+
+    $Id: rhdconfig.bob.xml 642 2009-07-21 21:02:55Z s021786 $
+-->
+<!-- Starting RHD Configuration -->
+<rhd>
+  <!-- *** Core Components Configuration *** -->
+  <!-- Sheduler configuration -->
+  <sheduler>
+    <period value="10000"/><!--in usec-->
+    <type value="LXRT"/><!--"usleep","itimer","LXRT" -->
+  </sheduler>
+  <!-- Server configuration -->
+  <server>
+    <port value="24902"/>
+    <clients number="10"/>
+  </server>
+	
+  <!-- *** Plugins Configuration *** -->
+	<plugins basepath="../lib/rhdplugin/">
+		<!-- Automation serial bus driver -->
+		<auserial enable="true" lib="libauserial.so.1" critical="true">
+			<bus name="RS485" dev="/dev/ttyS0" baudrate="115200" holdoff="6">
+			<!-- Left motor module -->
+			<!-- Motor modules sucks! 
+           Because they return data with another Id as requested-->
+			<device name="motorl" id="1">
+				<cmd type="request" name="reset" cmd="0">
+					<variable name="resetmotorl" dir="w" />
+				</cmd>
+				<cmd type="request" name="speed" cmd="1">
+					<variable name="speedl" dir="w" byte0="0"/>
+				</cmd>
+				<cmd type="poll" name="enclReq" cmd="2" pad="5"/>
+				<cmd type="request" name="enclRet" cmd="A">
+					<variable name="encl" dir="r" byte0="1" byte1="0" signed="true"/>
+					<variable name="motorstatusl" dir="r" byte0="2"/>
+					<variable name="pwml" dir="r" byte0="3"/>
+				</cmd>
+				<cmd type="request" name="setP" cmd="7">
+					<variable name="setpl" dir="w" byte0="0"/>
+				</cmd>
+				<cmd type="request" name="setI" cmd="8">
+					<variable name="setil" dir="w" byte0="0"/>
+				</cmd>
+				<cmd type="request" name="resetPI" cmd="9">
+					<variable name="resetpil" dir="w"/>
+				</cmd>
+			</device>
+			<!-- Right motor module -->
+			<device name="motorr" id="2">
+				<cmd type="request" name="reset" cmd="0">
+					<variable name="resetmotorr" dir="w" />
+				</cmd>
+				<cmd type="request" name="speed" cmd="1">
+					<variable name="speedr" dir="w" byte0="0" invert="true"/>
+				</cmd>
+				<cmd type="poll" name="enclReq" cmd="2" pad="5"/>
+				<cmd type="request" name="enclRet" cmd="A">
+					<variable name="encr" dir="r" byte0="1" byte1="0" invert="true" signed="true"/>
+					<variable name="motorstatusr" dir="r" byte0="2"/>
+					<variable name="pwmr" dir="r" byte0="3"/>
+				</cmd>
+				<cmd type="request" name="setP" cmd="7">
+					<variable name="setpr" dir="w" byte0="0"/>
+				</cmd>
+				<cmd type="request" name="setI" cmd="8">
+					<variable name="setir" dir="w" byte0="0"/>
+				</cmd>
+				<cmd type="request" name="resetPI" cmd="9">
+					<variable name="resetpir" dir="w"/>
+				</cmd>
+			</device>
+			<!-- Linesensor module -->
+			<device name="Irsensor1" id="6">
+				<cmd type="poll" name="values" cmd="1" pad="12">
+					<array name="ir1" dir="r">
+						<element byte0="0"/>
+						<element byte0="1"/>
+						<element byte0="2"/>
+						<element byte0="3"/>
+						<element byte0="4"/>
+						<element byte0="5"/>
+            <element byte0="6"/>
+            <element byte0="7"/>
+            <element byte0="8"/>
+            <element byte0="9"/>
+					</array>
+				</cmd>
+				</device>
+        <!-- Linesensor module -->
+        <device name="Irsensor2" id="7">
+          <cmd type="poll" name="values" cmd="1" pad="12">
+            <array name="ir2" dir="r">
+              <element byte0="0"/>
+              <element byte0="1"/>
+              <element byte0="2"/>
+              <element byte0="3"/>
+              <element byte0="4"/>
+              <element byte0="5"/>
+              <element byte0="6"/>
+              <element byte0="7"/>
+              <element byte0="8"/>
+              <element byte0="9"/>
+            </array>
+          </cmd>
+        </device>
+			<!-- IR sensor module -->
+			<device name="cursensor" id="8">
+				<cmd type="poll" name="distances" cmd="8" pad="7">
+          <array name="cursensor" dir="r">
+						<element byte0="0"/>
+						<element byte0="1"/>
+						<element byte0="2"/>
+						<element byte0="3"/>
+						<element byte0="4"/>
+						<element byte0="5"/>
+					</array>
+				</cmd>
+			</device>
+			</bus>
+		</auserial>
+	</plugins>
+</rhd>

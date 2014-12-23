@@ -1,0 +1,43 @@
+This is a plugin that controls
+a sabertooth 2x12 motorcontroller
+and two 12bit magnetic encoders (AS5045)
+in the end of the motor axle.
+
+The control is through an arduino-nano
+board.
+The firmware for the arduino nano is
+in the arduino subdirectory.
+
+The arduino nano implements a implements
+a simple velocity P-controller with feed forward.
+
+The magnetic encoder AS5045 is on the
+motor axle and interfaced using PCI.
+The sabertooth is controlled using RC pulse-width
+i.e. 1-2 ms pulses (repeated every 10ms).
+
+The encoder is read about 20 times each 10ms, and
+filtered by a median filter every 5 reads.
+The 12 bit encoder is extended by 3 bit to a total
+of 15 bit (repeating itself every 8 rotations of the motor)
+
+The control of the motor velocity is in
+encoder tics each 10ms. so a value of 2000 is max speed 
+forward (about 1/2 rotation every 10ms, or 50Hz or 3000RPM).
+-2000 is max speed reverse.
+The motor is rated to about 2500RPM, but tested on 27V to about 3000RPM.
+
+Motor commands are possible, -500 (full reverse) to
+ +500 (full forward), corresponding to
+a change from 2000us to 1000us pulsewidth to each of the wheel
+motors.
+
+An emergency stop, and "remove to start" will be implemented
+on the arduino and also available from the plugin.
+
+The arduino Makefile has an "make install" to the
+board using AVDdude command (using STK-kit).
+
+mvh
+Christian
+18 jun 2012

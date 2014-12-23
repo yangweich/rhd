@@ -1,0 +1,36 @@
+<?xml version="1.0" ?>
+<!--
+    Configuration file for 
+    Robot Hardware Daemon
+    
+    See something else for configuration description
+    
+    $Id: rhdconfig.stage.xml 1639 2011-07-13 10:11:12Z abb $
+    -->
+<!-- Starting RHD Configuration -->
+<rhd>
+	<!-- *** Core Components Configuration *** -->
+	<!-- Sheduler configuration -->
+	<scheduler>
+		<period value="10000"/><!--in usec-->
+		<type value="itimer"/><!--"usleep","itimer","LXRT" -->
+	</scheduler>
+	<!-- Server configuration -->
+	<server>
+		<port value="24902"/>
+		<clients number="10"/>
+		<mode value="synchronized"/>
+	</server>
+	
+	
+	<!-- *** Plugins Configuration *** -->
+	<plugins basepath="../lib/rhdplugin/">
+		<!-- Automation serial bus driver -->
+		<simStage enable="true" lib="libsimstage3.so.1" critical="true">
+			<world file="worlds/smrWorld.world" robotName="smr0"/>
+			<robot wheelbase="0.26" encresolution="0.00010245"/>
+			<irsensor ka="15.0" kb="0.0" />
+			<laserscanner port="4500" />
+		</simStage>
+	</plugins>
+</rhd>

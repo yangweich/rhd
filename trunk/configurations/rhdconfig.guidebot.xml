@@ -1,0 +1,41 @@
+<?xml version="1.0" ?>
+<!--
+    Configuration file for 
+    Robot Hardware Daemon
+
+    See something else for configuration description
+
+    $Id: rhdconfig.guidebot.xml 1664 2011-08-02 12:02:05Z abb $
+-->
+<!-- Starting RHD Configuration -->
+<rhd>
+  <!-- *** Core Components Configuration *** -->
+  <!-- Sheduler configuration -->
+  <sheduler>
+    <period value="10000"/><!--in usec-->
+    <type value="itimer"/><!--"usleep","itimer","LXRT" -->
+  </sheduler>
+  <!-- Server configuration -->
+  <server>
+    <port value="24902"/>
+    <clients number="10"/>
+  </server>
+
+  <!-- *** Plugins Configuration *** -->
+	<plugins basepath="../lib/rhdplugin/">
+		<!-- Joystick Control Not critical plugin for Guidebot -->
+		<joycontrol enable="true" lib="libjoycontrol.so.1" critical="false" safety="1">
+			<joystick port="/dev/input/js0"/>
+			<speed maxfwd="5000" maxturn="2500"/>
+			<deadband max="767" min="-767"/>
+			<control enable="true"/>
+			<scale right="0.835" left="1.000"/>
+		</joycontrol>
+		<!-- Guidebot Profibus -->
+		<gbprofibus enable="true" lib="libgbprofibus.so.1" critical="true">
+			<remotecontrol hysteresis="10"/>
+			<timing readperiods="3" writeperiods="3"/><!-- Scheduler periods for reading/writing -->
+		</gbprofibus>
+
+	</plugins>
+</rhd>

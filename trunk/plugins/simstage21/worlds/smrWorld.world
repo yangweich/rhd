@@ -1,0 +1,39 @@
+# simple.world - basic world file example
+# Authors: Richard Vaughan
+# $Id$
+
+include "smr.inc"
+include "map.inc"
+include "sick.inc"
+include "urg-04lx.inc"
+
+interval_sim 10  # simulation timestep in milliseconds 100
+interval_real 10  # real-time interval between simulation updates in milliseconds 
+
+paused 0
+
+# configure the GUI window
+window
+(
+  size [ 700.000 694.000 ] # in pixels
+  scale 37.000                 # pixels per meter
+  show_data 1              # 1=on 0=off
+)
+
+# load an environment bitmap
+floorplan
+( 
+  name "cave"
+  size [16.000 16.000 0.600]
+  #size [16 16 2.0]
+  bitmap "bitmaps/cave.png"
+)
+
+smr
+(		  
+  # can refer to the robot by this name
+  name "smr0"
+
+  pose [ -6.185 -6.387 0 45.000 ] 
+)
+

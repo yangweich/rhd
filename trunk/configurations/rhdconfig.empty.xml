@@ -1,0 +1,28 @@
+<?xml version="1.0" ?>
+<!--
+    Configuration file for 
+    Robot Hardware Daemon
+
+    This configuration is for the AU SMR
+
+    $Id: rhdconfig.empty.xml 1639 2011-07-13 10:11:12Z abb $
+-->
+<!-- Starting RHD Configuration -->
+<rhd>
+  <!-- *** Core Components Configuration *** -->
+  <!-- Sheduler configuration -->
+  <scheduler>
+    <period value="10000"/><!--in usec-->
+    <type value="itimer"/><!--"usleep","itimer","LXRT" -->
+    <realtimepriority enable="false"/> <!-- Enable use of RHD without root-priviliges in non-realtime (NOT for RTAI!)-->
+  </scheduler>
+  <!-- Server configuration -->
+  <server>
+    <port value="24902"/>
+    <clients number="10"/>
+  </server>
+	
+  <!-- *** Plugins Configuration *** -->
+	<plugins basepath="../lib/rhdplugin/">
+	</plugins>
+</rhd>

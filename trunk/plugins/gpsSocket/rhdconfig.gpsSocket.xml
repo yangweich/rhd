@@ -1,0 +1,37 @@
+<?xml version="1.0" ?>
+<!--
+    Configuration file for 
+    Robot Hardware Daemon
+
+    This configuration is for the
+		iRobot ATRV-Jr research robot
+
+    $Id: rhdconfig.atrvjr.xml 160 2008-10-20 14:01:21Z s021786 $
+-->
+<!-- Starting RHD Configuration -->
+<rhd>
+  <!-- *** Core Components Configuration *** -->
+  <!-- Sheduler configuration -->
+  <sheduler>
+    <period value="25000"/><!--in usec-->
+    <type value="itimer"/><!--"usleep","itimer","LXRT" -->
+  </sheduler>
+  <!-- Server configuration -->
+  <server>
+    <port value="24902"/>
+    <clients number="10"/>
+  </server>
+	
+  <!-- *** Plugins Configuration *** -->
+	<plugins basepath="/usr/local/smr/lib/rhdplugin/">
+		
+	<!-- Serial GPS module -->
+	<gps  enable="true" lib="libgps.so.1" critical="false">
+		<connection con="socket" /> <!--[serial/socket]-->
+		<socket portIP="5017" ip="192.168.0.1" /><!--set port and IP on you receiver-->
+		<serial port="/dev/ttyUSB0" baudrate="19200"/><!--set port and baudrate on you receiver-->
+		<utmzone value="33"/><!-- Default UTM Zone -->
+	</gps>
+
+	</plugins>
+</rhd>

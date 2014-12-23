@@ -1,0 +1,58 @@
+<?xml version="1.0" ?>
+<!--
+    Configuration file for 
+    Robot Hardware Daemon
+
+    This configuration is for the Phidget Sensor
+
+  
+-->
+<!-- Starting RHD Configuration -->
+<rhd>
+  <!-- *** Core Components Configuration *** -->
+  <!-- Sheduler configuration -->
+  <sheduler>
+    <period value="10000"/><!--in usec 10ms is MIN-->
+    <type value="itimer"/><!--"usleep","itimer","LXRT" -->
+  </sheduler>
+  <!-- Server configuration -->
+  <server>
+    <port value="24902"/>
+    <clients number="10" allwriters="1"/>
+  </server>
+    
+  <!-- *** Plugins Configuration *** -->
+  <plugins basepath="/home/savnik/Documents/BSc/mobotware-3.598/rhd/trunk/build/lib/rhdplugin/">
+    <!-- Joystick Control
+          Updated!! Observe the max speed setting, deadband and the "safety" parameter -->
+    
+    <!-- Phidget Bridge -->
+    <phidgetsbridge2
+	    enable = "true"
+	    lib="phidgetsbridge2.so.1"
+	    debug = "1"
+	    interval = "0"
+	    updateTimeMs = "10"
+	    gain = "128 128 128 0"
+	    enableCh = "1 1 1 0"
+	    offset = "-290 6050 -90 0"
+	    k = "876 870 360 1"
+      >
+    </phidgetsbridge2>  
+    
+    <!-- Flight Control System - Tether Control of UAV -->
+    <fcs 
+	    enable= "true"
+	    lib="fcs.so.1"
+	    debug = "true"
+      >
+    </fcs>  
+    <rhdlog enable = "true"
+            lib="rhdlog.so.1"
+            debug="true"
+            interval="0"
+           >
+    </rhdlog>
+  </plugins>
+</rhd>
+

@@ -1,0 +1,139 @@
+<?xml version="1.0" ?>
+<!--
+    Configuration file for 
+    Robot Hardware Daemon
+
+    This configuration is for the AU SMR
+
+    $Id: rhdconfig.smrS1.xml 1639 2011-07-13 10:11:12Z abb $
+-->
+<!-- Starting RHD Configuration -->
+<rhd>
+  <!-- *** Core Components Configuration *** -->
+  <!-- Sheduler configuration -->
+  <sheduler>
+    <period value="10000"/><!--in usec-->
+    <type value="itimer"/><!--"usleep","itimer","LXRT" -->
+    <realtimepriority enable="true"/> <!-- Enable use of RHD without root-priviliges in non-realtime (NOT for RTAI!)-->
+  </sheduler>
+  <!-- Server configuration -->
+  <server>
+    <port value="24902"/>
+    <clients number="10"/>
+  </server>
+	
+	
+  <!-- *** Plugins Configuration *** -->
+	<plugins basepath="/usr/local/smr/lib/rhdplugin/">
+		<!-- Automation serial bus driver -->
+		<auserial enable="true" lib="libauserial.so.1" critical="true">
+			<bus name="RS485" dev="/dev/ttyS1" baudrate="115200" holdoff="6">
+			<!-- Left motor module -->
+			<!-- Motor modules sucks! Because they return data with another Id as requested-->
+			<device name="motorl" id="1">
+				<cmd type="request" name="reset" cmd="0">
+					<variable name="resetmotorl" dir="w" />
+				</cmd>
+				<cmd type="request" name="speed" cmd="1">
+					<variable name="speedl" dir="w" byte0="0"/>
+				</cmd>
+				<cmd type="poll" name="enclReq" cmd="2" pad="5"/>
+				<cmd type="request" name="enclRet" cmd="A">
+					<variable name="encl" dir="r" byte0="1" byte1="0" signed="true"/>
+					<variable name="motorstatusl" dir="r" byte0="2"/>
+					<variable name="pwml" dir="r" byte0="3"/>
+				</cmd>
+				<cmd type="request" name="setP" cmd="7">
+					<variable name="setpl" dir="w" byte0="0"/>
+				</cmd>
+				<cmd type="request" name="setI" cmd="8">
+					<variable name="setil" dir="w" byte0="0"/>
+				</cmd>
+				<cmd type="request" name="resetPI" cmd="9">
+					<variable name="resetpil" dir="w"/>
+				</cmd>
+			</device>
+			<!-- Right motor module -->
+			<device name="motorr" id="2">
+				<cmd type="request" name="reset" cmd="0">
+					<variable name="resetmotorr" dir="w" />
+				</cmd>
+				<cmd type="request" name="speed" cmd="1">
+					<variable name="speedr" dir="w" byte0="0" invert="true"/>
+				</cmd>
+				<cmd type="poll" name="enclReq" cmd="2" pad="5"/>
+				<cmd type="request" name="enclRet" cmd="A">
+					<variable name="encr" dir="r" byte0="1" byte1="0" invert="true" signed="true"/>
+					<variable name="motorstatusr" dir="r" byte0="2"/>
+					<variable name="pwmr" dir="r" byte0="3"/>
+				</cmd>
+				<cmd type="request" name="setP" cmd="7">
+					<variable name="setpr" dir="w" byte0="0"/>
+				</cmd>
+				<cmd type="request" name="setI" cmd="8">
+					<variable name="setir" dir="w" byte0="0"/>
+				</cmd>
+				<cmd type="request" name="resetPI" cmd="9">
+					<variable name="resetpir" dir="w"/>
+				</cmd>
+			</device>
+			<!-- Linesensor module -->
+			<device name="linesensor" id="7">
+				<cmd type="poll" name="values" cmd="1" pad="10">
+					<array name="linesensor" dir="r">
+						<element byte0="0"/>
+						<element byte0="1"/>
+						<element byte0="2"/>
+						<element byte0="3"/>
+						<element byte0="4"/>
+						<element byte0="5"/>
+						<element byte0="6"/>
+						<element byte0="7"/>
+					</array>
+				</cmd>
+				</device>
+			<!-- IR sensor module -->
+			<device name="irsensor" id="8">
+				<cmd type="poll" name="distances" cmd="8" pad="9">
+					<array name="irsensor" dir="r">
+						<element byte0="0"/>
+						<element byte0="1"/>
+						<element byte0="2"/>
+						<element byte0="3"/>
+						<element byte0="4"/>
+						<element byte0="5"/>
+					</array>
+				</cmd>
+			</device>
+			<!-- Power supply module -->
+			<device name="power" id="9">
+				<cmd type="poll" name="status" cmd="1" pad="11">
+					<array name="digital" dir="r">
+						<element b0="2,0"/>
+						<element b0="3,0"/>
+						<element b0="4,0"/>
+						<element b0="5,0"/>
+						<element b0="6,0"/>
+						<element b0="7,0"/>
+					</array>
+					<array name="analog" dir="r">
+						<element byte0="2" b8="0,0" b9="1,0"/>
+						<element byte0="3" b8="6,1" b9="7,1"/>
+						<element byte0="4" b8="4,1" b9="5,1"/>
+						<element byte0="5" b8="2,1" b9="3,1"/>
+						<element byte0="6" b8="0,1" b9="1,1"/>
+					</array>
+				</cmd>
+				<cmd type="request" name="battcapacity" cmd="5" pad="6">
+					<variable name="getbattcapacity" dir="w"/>
+					<variable name="battcapacity" dir="r" byte0="1" byte1="0" />
+					<variable name="battchgcapacity" dir="r" byte0="3" byte1="2" />
+				</cmd>
+				<cmd type="request" name="calibratebattery" cmd="6" pad="2">
+					<variable name="calibratebattery" dir="w"/>
+				</cmd>
+			</device>
+			</bus>
+		</auserial>
+	</plugins>
+</rhd>

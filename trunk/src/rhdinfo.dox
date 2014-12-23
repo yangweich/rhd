@@ -1,0 +1,42 @@
+ /* Text definition for Doxygen documentation */
+/************************** Version control information ***************************/
+ "$Rev: 49 $:"
+ "$Date: 2008-05-16 07:47:00 +0200 (Fri, 16 May 2008) $:"
+/**********************************************************************************/
+/** \mainpage Robot Hardware Daemon (RHD)
+ *
+ * This damon is a universal hardware abstraction layer for mobile
+ * robots and essentially any other setup, where interface between
+ * a linux computer and external hardware is needed.
+ * 
+ * All communication is based on a variable database, that syncronizes
+ * with clients through a TCP/IP Server/Client. Client syncronization is
+ * performed periodically in a predefined timing period.
+ * 
+ * Hardware support in RHD is based on modules, that does the actual
+ * hardware interaction and data-parsing. Each module is responsible
+ * of creating and updating the variables accociated with the hardware.
+ * 
+ * Please read the documentation for further inspiration on how to
+ * create or modify modules.
+ */
+
+/** \defgroup core Core Modules
+ *
+ * Robot Hardware Daemon is based upon a set of core modules
+ * that is the foundation of it's functionality.
+ * 
+ * The core modules are the global variable database, 
+ * the TCP/IP socket server and the real-time sheduler
+ *
+ */
+
+/** \defgroup hwmodule Hardware Modules
+ *
+ * Specific hardware interface modules
+ * 
+ * A hardware module responsible for creating database variables,
+ * interfacing and parsing data from the hardware units and updating
+ * database variables
+ * 
+ */

@@ -1,0 +1,75 @@
+<?xml version="1.0" ?>
+<!--
+    Configuration file for 
+    Robot Hardware Daemon
+
+    This configuration is for the green robot (Christian's private robot)
+
+    $Id: rhdconfig.xml 409 2014-02-09 16:49:12Z jcan $
+-->
+<!-- Starting RHD Configuration -->
+<rhd>
+  <!-- *** Core Components Configuration *** -->
+  <!-- Sheduler configuration -->
+  <sheduler>
+    <period value="20000"/><!--in usec-->
+    <type value="itimer"/><!--"usleep","itimer","LXRT" -->
+  </sheduler>
+  <!-- Server configuration -->
+  <server>
+    <port value="24902"/>
+    <clients number="10" allwriters="1"/>
+  </server>
+    <!-- robot configuration (for all plugins) - in meters for the most part.
+         wheelbase is distance between rear wheels
+         steerbase is distance between front and rear axis
+         frontbase is distance between front wheels -->
+    <robot
+      wheelBase = "0.215"
+      steerBase = "0.25"
+      frontBase = "0.22"
+    />
+  <!-- *** Plugins Configuration *** -->
+  <plugins basepath="/usr/local/smr/lib/rhdplugin/">
+    <!-- Joystick Control
+          Updated!! Observe the max speed setting, deadband and the "safety" parameter -->
+    <!-- 
+      servo usbISS connection to open servo
+       - this is a temporary setup to debug servo, and maybe to re-address the servo
+    --> 
+    <usbiss6
+       enable="true"
+       lib="libusbiss6servo.so.1"
+       critical="true"
+       safety="3"
+       debug="0"
+       >
+<!-- i2c bus and servo configuration
+      servo is "id, minpos, maxpos, scale, offset, P, D"
+      - id is i2c address excluding tha last bit, i.e 0x10 gives 0x20 for write and 0x21 for read
+      - minpos is the minimum position for the servo (in servo units)
+      - maxpos is the maximum position for the servo in servo units
+      - scale is scale factor from RHD units to servo units
+      - offset is offset in servo units to get from rhd range to servo range
+      - p is proportional gain - in servo units - 0 is always idle 1000 is very strong
+      - d is differential gain - in servo units
+      First servo gets index 0
+      -->
+        <i2c
+          id="32"
+          dev="/dev/ttyACM0"
+          debug="1"
+          r2sScale="1"
+          r2sOffset="0"
+        />
+        <servo id="0x20" minpos="100" maxpos="4000" p="10" d="0" scale="1.01" offset="0" name="leg1-yaw"/>
+    </usbiss6>
+    <rhdlog enable = "true"
+            lib="rhdlog.so.1"
+            debug="true"
+            interval="1"
+           >
+    </rhdlog>
+  </plugins>
+</rhd>
+

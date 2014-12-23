@@ -1,0 +1,31 @@
+<?xml version="1.0" ?>
+<!--
+    Configuration file for 
+    Robot Hardware Daemon
+
+    See something else for configuration description
+
+    $Id: rhdconfig.powercube2.0.xml 1639 2011-07-13 10:11:12Z abb $
+-->
+<!-- Starting RHD Configuration -->
+<rhd>
+  <!-- *** Core Components Configuration *** -->
+  <!-- Sheduler configuration -->
+  <sheduler>
+    <period value="10000"/><!--in usec-->
+    <type value="itimer"/><!--"usleep","itimer","LXRT" -->
+  </sheduler>
+  <!-- Server configuration -->
+  <server>
+    <port value="24902"/>
+    <clients number="10"/>
+  </server>
+
+  <!-- *** Plugins Configuration *** -->
+	<plugins basepath="../lib/rhdplugin/">
+		<!-- Powercube CAN -->
+		<powercube enable="true" lib="libpowercube2.0.so.0" critical="false">
+			<controlcan port="can0" />
+		</powercube>
+	</plugins>
+</rhd>

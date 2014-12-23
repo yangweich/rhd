@@ -1,0 +1,125 @@
+<?xml version="1.0" ?>
+
+NB! wrong file - see ~/mobotware/build/config/gogo
+
+<!--
+    Configuration file for 
+    Robot Hardware Daemon
+
+    This configuration is for the AU SMR
+
+    $Id: rhdconfig.smr.xml 642 2009-07-21 21:02:55Z s021786 $
+-->
+<!-- Starting RHD Configuration -->
+<rhd>
+  <!-- *** Core Components Configuration *** -->
+  <!-- Sheduler configuration -->
+  <sheduler>
+    <period value="10000"/><!--in usec-->
+    <type value="itimer"/><!--"usleep","itimer","LXRT" -->
+  </sheduler>
+  <!-- Server configuration -->
+  <server>
+    <port value="24902"/>
+    <clients 
+      number="10" 
+      allwriters="1"
+      />
+  </server>
+  <!-- robot configuration (for all plugins) - in meters for the most part.
+        wheelbase is distance between rear wheels
+        steerbase is distance between front and rear axis
+        frontbase is distance between front wheels -->
+  <robot
+    wheelBase = "0.31"
+    steerBase = "0.49"
+    frontBase = "0.285"
+    tickPerRev = "2048"
+    gearRatio="5.5"
+    wheelDiameter="0.14"
+  />
+  <!-- *** Plugins Configuration *** -->
+  <plugins basepath="/usr/local/smr/lib/rhdplugin/">
+          <!-- joy control 
+          for gogo:
+          speed is in mm/sec and turn in centi degrees.
+          deadbamd is in gamepad units (+/- 32000)
+          if control is not enabled, then no control of turn and speed.
+          -->
+    <joycontrol enable="true" 
+      lib="libjoycontrol.so.1" 
+      critical="false" 
+      safety="1">
+      <joystick port="/dev/input/js0"/>
+      <speed maxfwd="3000" maxturn="900"/>
+      <deadband max="767" min="-767"/>
+      <control enable="true"/>
+    </joycontrol>
+    <!-- 
+      * herkulex servo values: "pID mintick centertick maxtick
+      * dead zone (with no movement around target position) (0..255)
+      * saturatorOffset first PWM value outside dead zone - 0 is OFF (0..255)
+      * saturatorSlope (force P control) off if 0, else PWM value for each position error tick / 256,
+        i.e. value of 256 will add 1 PWM value for each position error + offset outside dead-zone
+        (0 .. 7FFF (0..32000)) high value gives more firm grip.
+      * minPWM set >0 to compensate for (static) friction (0..255)
+      * maxPWM set < 1023 to reduce maximum force
+      * maxAcc is time to reach (top) seed in units of 11ms, 0 is no acc control
+      * accRatio is 19, lower makes slower higher may make unstable?
+      * playtime90deg set>0 to try to synchronize movement, in csec, i.e. 50 is ~0.5 sec for 90 deg movement
+      * getRAM if != 0 then all 73 bytes of RAM status from servo is available in RHD
+      * debug if 1 then errors during startup is ignored
+      * debugIO if is e.g. 3 then three status messages from each servo is shown after each update
+-->
+    <herkulex enable="true" lib="libherkulex.so.1" 
+       critical="true" 
+       safety="2"
+       dev="/dev/ttyACM0" baudrate="115200"
+       servoLeft ="0xfd 21 527 1002"
+       servoRight="0xfc 21 531 1002"
+       deadzone="3"
+       saturatorOffset="0"
+       saturatorSlope="0"
+       minPWM="5"
+       maxPWM="1023"
+       maxAcc="5"
+       accRatio="19"
+       playtime90deg="70"
+       getRAM="0"
+       debug="0"
+       debugIO="0"
+       mode="0">
+    </herkulex>
+    <!-- 
+      Interface to Sabertooth motor controller and magnetic encoder (SaMe)
+      through an arduino nano controller (fixed speed is 115200 bit/sec)
+      debug option may print more do console and continues even if interface init fails.
+      zero vel offset is in m/s to get stable zero velocity in PWM mode. 
+      velmode is 0=PWM mode, 1=velocity mode
+      velctlFF is velocity mode feed forwared gain (0..128)
+      velctlK is velocity mode proportional gain (0..64)-->
+    <saberandmagenc enable="true" 
+       lib="saberandmagenc.so.1" 
+       critical="true"
+       safety = "3"
+       dev="/dev/ttyUSB0"
+       zeroVelOffsetL="0.01"
+       zeroVelOffsetR="-0.01"
+       velmode="1"
+       velctrlFF="16"
+       velctrlK="1"
+       debug = "false">
+     </saberandmagenc>
+     <!-- 
+       Interface to SparkFun combined acc, gyro and magnetometer board 
+       -->
+     <sf9dof enable="false"
+      lib="libsf9dof.so.1"
+      critical="false"
+      dev="/dev/ttyUSB1"
+      baudrate="57600"
+      debug="0"
+      safety="4">
+     </sf9dof>
+  </plugins>
+</rhd>

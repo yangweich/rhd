@@ -1,0 +1,8 @@
+#!/bin/sh
+
+SUBDIRS="ci_dll dp_base dps_base"
+
+for i in $SUBDIRS
+do make -C $i
+done
+

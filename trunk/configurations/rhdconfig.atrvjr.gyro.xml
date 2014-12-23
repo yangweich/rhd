@@ -1,0 +1,81 @@
+<?xml version="1.0" ?>
+<!--
+    Configuration file for 
+    Robot Hardware Daemon
+
+    This configuration is for the
+		iRobot ATRV-Jr research robot
+
+    $Id: rhdconfig.atrvjr.xml 160 2008-10-20 14:01:21Z s021786 $
+-->
+<!-- Starting RHD Configuration -->
+<rhd>
+  <!-- *** Core Components Configuration *** -->
+  <!-- Sheduler configuration -->
+  <sheduler>
+    <period value="25000"/><!--in usec-->
+    <type value="LXRT"/><!--"usleep","itimer","LXRT" -->
+  </sheduler>
+  <!-- Server configuration -->
+  <server>
+    <port value="24902"/>
+    <clients number="10"/>
+  </server>
+
+  <!-- *** Plugins Configuration *** -->
+  <plugins basepath="/usr/local/smr/lib/rhdplugin/">
+    <!-- rFLEX driver for iRobot research robots -->
+    <rflex enable="true" lib="librflex.so.1" critical="true">
+            <serial port="/dev/ttyS0" baudrate="115200" />
+            <odometry period="1000" />
+            <translation accel="100000" torque="30000" />
+            <rotation accel="100000" torque="35000" />
+            <bumperbrake default="false" />
+    </rflex>
+    <!-- Automation serial bus driver -->
+    <auserial enable="true" lib="libauserial.so.1" critical="true">
+      <bus name="RS485" dev="/dev/ttyS1" baudrate="115200" holdoff="6">
+        <!-- Gyroscope-->
+        <device name="gyroscope" id="A">
+          <cmd type="poll" name="rate" cmd="2" pad="8">
+            <array name="XbowYaw" dir="r">
+              <element byte0="1" byte1="0" signed="true"/>
+              <element byte0="3" byte1="2" signed="true"/>
+              <element byte0="5" byte1="4" signed="true"/>
+            </array>
+            <array name="gyrorate" dir="r">
+              <element byte0="1" byte1="0" signed="true"/>
+              <element byte0="3" byte1="2" signed="true"/>
+              <element byte0="5" byte1="4" signed="true"/>
+            </array>
+          </cmd>
+          <cmd type="poll" name="rate" cmd="1" pad="8">
+            <array name="gyropos" dir="r">
+              <element byte0="1" byte1="0" signed="true"/>
+              <element byte0="3" byte1="2" signed="true"/>
+              <element byte0="5" byte1="4" signed="true"/>
+            </array>
+          </cmd>
+        </device>
+      </bus>
+    </auserial>
+    <!-- Serial ESM module -->
+    <esm  enable="true" lib="libesm.so.1" critical="false">
+      <serial port="/dev/ttyUSB2" baudrate="19200"/>    
+    </esm>
+    <!-- Joystick Control -->
+    <joycontrol enable="true" lib="libjoycontrol.so.1" critical="true" safety="1">
+	<joystick port="/dev/input/js0"/>
+        <!-- speed:
+              maxfwd,maxturn is max value send to device
+              fastBut is button number on joypad (0..10)
+              slowFactor used when fastBut is not pressed (0.1 .. 1.0) 1.0 is default -->
+        <speed  maxfwd="150000" 
+                maxturn="50000"
+                fastBut="5"
+                slowFactor="0.3"/>
+        <deadband max="767" min="-767"/>
+        <control enable="true"/>
+    </joycontrol>
+  </plugins>
+</rhd>

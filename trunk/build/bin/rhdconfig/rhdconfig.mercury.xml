@@ -1,0 +1,123 @@
+<?xml version="1.0" ?>
+<!--
+    Configuration file for 
+    Robot Hardware Daemon
+
+    This configuration is for the Mercury robot (Christian's private robot)
+
+    $Id: rhdconfig.mercury.xml 1789 2012-01-14 18:55:05Z jca $
+-->
+<!-- Starting RHD Configuration -->
+<rhd>
+  <!-- *** Core Components Configuration *** -->
+  <!-- Sheduler configuration -->
+  <sheduler>
+    <period value="200000"/><!--in usec-->
+    <type value="LXRT"/><!--"usleep","itimer","LXRT" -->
+  </sheduler>
+  <!-- Server configuration -->
+  <server>
+    <port value="24902"/>
+    <clients number="10" allwriters="1"/>
+  </server>
+    <!-- robot configuration (for all plugins) - in meters for the most part.
+         wheelbase is distance between rear wheels
+         steerbase is distance between front and rear axis
+         frontbase is distance between front wheels -->
+    <robot
+      wheelBase = "0.203"
+      steerBase = "0.275"
+      frontBase = "0.133"
+    />
+  <!-- *** Plugins Configuration *** -->
+  <plugins basepath="/usr/local/smr/lib/rhdplugin/">
+    <!-- serial bus driver - an i2c bus based on the USBISS module from Daventech Ltd
+         http://www.acroname.com/robotics/parts/R348-USB-ISS.html -->
+    <!--usbiss enable="true" lib="libusbiss.so.1" critical="false"-->
+      <!-- the bus configuration -->
+      <!--bus name="i2c" dev="/dev/ttyACM0" id="0x5a" speed="100kHz" debug="1"/-->
+      <!-- motor module - a motor driver module from
+           http://www.robot-electronics.co.uk/htm/md25tech.htm -->
+      <!--md25drive name="motorCtrl" id="0xb0"/>
+    </usbiss-->
+    <!-- sd84 multi IO,
+           servospeed is servo speed, 0 is fastest, 1 is slow (1 tick per 20 ms)...
+           servo is zero based,
+           joy steering and speed - starts wite jss
+           servo 6 (left) and 7 (right) are steering
+           the steering scale is in pulse with units (us) for 1 radian.
+           servo 12 is turn, 13 is elevate (lift), 16 hand rot, 17 gripper, 18 elbow, 19 hand
+           joystick arm control values (starts with ja):
+           servos: "axis-index-on-joy  servo-index   minimum-value center-value
+                      maximum-value  invert-axis speed(higher-is-faster)"
+           toggle buttons: "button-on-joy     out-index"     
+           -->
+           
+    <sd84 enable="false"
+          lib="libsd84.so.1"
+          critical="false"
+          dev="/dev/ttyUSB0"
+          servospeed="0 0 0 0 0 0 0 0 0 0 0 0  6 3  0 0  20 10 3 5"
+          debug="0"
+          jssOverrideBut="5"
+          steerScale= "570"
+          jssFrontLeft="2 6 -950  -200 950 0 0 0"
+          jssFrontRight="2 7 -950   70 950 0 0 0"
+          jaturn=   "0 12 -830 180 900 1 2    6"
+          jalift=   "1 13 -750 130 750 1 2    3"
+          jaelbow=  "3 18 -800   0 900 0 4    3"
+          jahandrot="4 16 -850   0 850 1 24  20"
+          jahand=   "2 19 -850   0 900 1 8    5"
+          jagripper="5 17 -340   0 380 1 16  10"
+          jatakectrl="3 -1"
+          jalaser="1 8"
+          japower="0 11"
+          >
+    </sd84>
+    <!-- Joystick Control
+          Updated!! Observe the max speed setting, deadband and the "safety" parameter -->
+    <joycontrol enable="true" lib="libjoycontrol.so.1" critical="false" safety="1">
+        <joystick port="/dev/input/js0"/>
+	<deadband max="767" min="-767"/>
+	<control enable="true"/>
+	<speed maxfwd="30" maxturn="15"/>
+    </joycontrol>
+    <sf9dof enable="false"
+          lib="libsf9dof.so.1"
+          critical="false"
+          dev="/dev/ttyS1"
+          baudrate="38400"
+          debug="0">
+    </sf9dof>
+    <gbprofibus enable="true" lib="libgbprofibus.so.1" critical="false">
+      <remotecontrol hysteresis="10"/>
+      <timing readperiods="3" writeperiods="3"/><!-- Scheduler periods for reading/writing -->
+    </gbprofibus>
+
+    <usbiss enable="false" lib="libusbiss.so.1" critical="false">
+      <!-- the bus configuration -->
+      <bus name="i2c" 
+           dev="/dev/ttyACM0" 
+           id="0x5a" 
+           speed="100kHz" 
+           debug="0"
+           />
+      <!-- motor module - a motor driver module from
+           http://www.robot-electronics.co.uk/htm/md25tech.htm
+           joy max speed is on a scale from 0 to 127 (fast is fixed to 127) -->
+      <md25drive 
+           name="motorCtrl" 
+           id="0xb0"
+           joySpeedAxis="3"
+           joyFastBut="7"
+           joyMaxSpeed="50"
+           />
+    </usbiss>
+    <rhdlog enable = "true"
+            lib="rhdlog.so.1"
+            debug="true"
+            interval="0"
+           >
+    </rhdlog>
+  </plugins>
+</rhd>

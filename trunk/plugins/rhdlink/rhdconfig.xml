@@ -1,0 +1,45 @@
+<?xml version="1.0" ?>
+<!--
+    Configuration file for 
+    Robot Hardware Daemon
+
+    This configuration is for the Phidget Sensor
+
+  
+-->
+<!-- Starting RHD Configuration -->
+<rhd>
+  <!-- *** Core Components Configuration *** -->
+  <!-- Sheduler configuration -->
+  <sheduler>
+    <period value="10000"/><!--in usec 10ms is MIN-->
+    <type value="itimer"/><!--"usleep","itimer","LXRT" -->
+  </sheduler>
+  <!-- Server configuration -->
+  <server>
+    <port value="24902"/>
+    <clients number="10" allwriters="1"/>
+  </server>
+    
+  <!-- *** Plugins Configuration *** -->
+  <plugins basepath="/home/savnik/Documents/BSc/mobotware-3.598/rhd/trunk/build/lib/rhdplugin/">
+    <!-- Joystick Control
+          Updated!! Observe the max speed setting, deadband and the "safety" parameter -->
+    
+    <!-- *** RHD Link - creates a link to another RHD server *** -->
+    <rhdlink enable="true"
+      host="192.168.7.2"
+      port="24902"
+      access="w"
+      debug="true">
+    </rhdlink>
+    
+    <rhdlog enable = "true"
+            lib="rhdlog.so.1"
+            debug="true"
+            interval="0"
+           >
+    </rhdlog>
+  </plugins>
+</rhd>
+
