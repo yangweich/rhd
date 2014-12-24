@@ -15,16 +15,16 @@
 #define RHDLINK_H
 
 // Connect to RHD instance
-int connectRHD();
+//int connectRHD();
 
 // Test connection
-int isConnectedRHD();
+//int isConnectedRHD();
 
 // Sync both read/write variables
-int syncRHD();
+//int syncRHD();
 
 // Stop
-int stopRHD();
+//int stopRHD();
 
 
 // RHD control functions

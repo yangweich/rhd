@@ -23,15 +23,15 @@
     
   <!-- *** Plugins Configuration *** -->
   <plugins basepath="/home/savnik/Documents/BSc/mobotware-3.598/rhd/trunk/build/lib/rhdplugin/">
-    <!-- Joystick Control
-          Updated!! Observe the max speed setting, deadband and the "safety" parameter -->
     
     <!-- *** RHD Link - creates a link to another RHD server *** -->
     <rhdlink enable="true"
-      host="192.168.7.2"
+      lib="rhdlink.so.1"
+      debug="true"
+      remoteHost="127.0.0.1"
       port="24902"
       access="w"
-      debug="true">
+      >
     </rhdlink>
     
     <rhdlog enable = "true"

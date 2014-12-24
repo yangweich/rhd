@@ -18,25 +18,16 @@
 /***************************************************************************/
 
 
-//#include <sched.h> 
-//#include <pthread.h>
+
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-//#include <sys/types.h>
-//#include <sys/stat.h>
-//#include <fcntl.h>
-//#include <termios.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/ioctl.h>
-//#include <signal.h>
-//#include <linux/serial.h>
 #include <sys/time.h>
-//#include <sys/mman.h>
 #include <expat.h>
-//#include <poll.h>
 #include <math.h>
 #include <stdint.h>
 #include <sys/time.h>
@@ -105,6 +96,7 @@ struct timeval tickTime;
 char* host = "127.0.0.1"; // Default host
 int port = 24902; // Default port
 int writeAccess = 0; // Default access rights read 0 / write 1
+int connected = 0;
 
 /// Database variables
 
@@ -113,21 +105,34 @@ int writeAccess = 0; // Default access rights read 0 / write 1
 
 /**
  * init new requests to bus (called periodically)
+ // 1. Check connection
+ // 2. If not connected try to connect
+ // 3. If connected sync symTableElements
+ // 4. Return 
  * \return 0 on ok
  * */
 extern int periodic(int rhdTick)
 {
-    
-  // 1. Check connection
-  // 2. If not connected try to connect
-  // 3. If connected sync symTableElements
-  // 4. Return
+  char result;
   
   tick = rhdTick;
 
+  // 1. Check connection
+ if(!connected){
+  // Trying connection
+  printf("Trying to connect to remote host, %s:%d\n",host,port);
+  if(writeAccess == 1) result = rhdConnectLink('w', host, port);
+  else result = rhdConnectLink('r',host,port);
   
+  if((!(strcmp(result,'r') == 0)) && (!(strcmp(result,'w') == 0))) {
+   printf("No connection!\n"); 
+   return 0;
+  }
+  else connected = 1;  
+ }
  
-      
+// Sync
+rhdSyncLink();
   
   
   return 0;
@@ -174,6 +179,7 @@ int terminate(void)
  */
 extern int initXML(char *filename)
 {
+  
   int result;
   parseInfo xmlParse; 
   char *xmlBuf = NULL;
@@ -202,11 +208,13 @@ extern int initXML(char *filename)
   //data.varEnableCh = -1;
   
   
+  
   /* Initialize Expat parser*/
   XML_Parser parser = XML_ParserCreate(NULL);
   result = parser != 0;
   if (!result)
     fprintf(stderr, PLUGINNAME ": Couldn't allocate memory for XML parser\n");
+ 
   if (result)
   {  //Setup element handlers
     XML_SetElementHandler(parser, lsStartTag, lsEndTag);
@@ -221,6 +229,7 @@ extern int initXML(char *filename)
     if(!result)
       printf(PLUGINNAME ": Error reading: %s\n",filename);
   }
+
   if (result)
   { //Get the length of the file
     fseek(fp,0,SEEK_END);
@@ -232,6 +241,7 @@ extern int initXML(char *filename)
     if (!result)
         fprintf(stderr, "   RHDLink: Couldn't allocate memory for XML File buffer\n");
   }
+ 
   if (result)
   { // clear buffer
     memset(xmlBuf,0,xmlFilelength);
@@ -239,12 +249,15 @@ extern int initXML(char *filename)
     len = fread(xmlBuf, 1, xmlFilelength, fp);
     fclose(fp);
     //Start parsing the XML file
+    
     result = (XML_Parse(parser, xmlBuf, len, done) != XML_STATUS_ERROR);
+    printf("Debug flag\n");
     if (!result)
       fprintf(stderr, PLUGINNAME ": XML Parse error at line %d: %s\n",
             (int)XML_GetCurrentLineNumber(parser),
             XML_ErrorString(XML_GetErrorCode(parser)));
   }
+
   if (parser != NULL)
     XML_ParserFree(parser);
   if (xmlBuf != NULL)
@@ -254,8 +267,10 @@ extern int initXML(char *filename)
     //result = init();
     result = 1;
   }
-  if (result)
+  if (result){
+    printf(PLUGINNAME ": Initialization is done");
     return 1;
+  }
   else
     return -1;
 }
@@ -307,11 +322,11 @@ void XMLCALL lsStartTag(void *datainfo, const char *el, const char **attr)
             {
               debugFlag = strtol(val, NULL, 0);
               if (debugFlag)
-                printf("   TCUAV started in DEBUG mode!\n");
+                printf("   RHDLINK started in DEBUG mode!\n");
             }
             
             // Get host
-            else if((strcmp("host",att) == 0)){
+            else if((strcmp("remoteHost",att) == 0)){
 	      strcpy(host,val);
 	    }
 	    
