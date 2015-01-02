@@ -34,28 +34,32 @@ plot(t,data)
 %freqz(data);
 
 % Design a butterworth filter
-Wp = 40/(0.5*f);
-Ws = 50/(0.5*f);
+Wp = 20/(f);
+Ws = 40/(f);
 Rp = 1;
 Rs = 60;
 [n,Wn] = buttord(Wp,Ws,Rp,Rs) 
 [b,a] = butter(n, Wn, 'low')
-%freqz(b,a)
+freqz(b,a)
 
 y = filter(b,a,data);
 
-%hold on;
-%plot(t,data,'blue')
-%plot(t,y,'red')
-%hold off;
+%%
+close all;
+figure;
+hold on;
+plot(t,data,'blue')
+plot(t,y,'red')
+hold off;
 
-%
+%%
 close all;
 [hfilt,wfilt] = freqz(y);
  
 hold on;
-plot(w*f*(2/pi),20*log10(abs(h)),'blue');
-plot(wfilt*f/(2*pi),20*log10(abs(hfilt)),'red');
+plot(w*(f*0.5)*(2/pi),20*log10(abs(h)),'blue');
+plot(wfilt*(f*0.5)*(2/pi),20*log10(abs(hfilt)),'red');
+legend('Raw','Filtered');
 xlabel('Frequency (Hz)');
 ylabel('Magnitude (dB)');
 
