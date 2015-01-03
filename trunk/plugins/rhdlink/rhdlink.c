@@ -124,16 +124,17 @@ extern int periodic(int rhdTick)
   if(writeAccess == 1) result = rhdConnectLink('w', host, port);
   else result = rhdConnectLink('r',host,port);
   
-  if((!(strcmp(result,'r') == 0)) && (!(strcmp(result,'w') == 0))) {
+  if((int) result < 0) {
    printf("No connection!\n"); 
    return 0;
   }
   else connected = 1;  
  }
  
-// Sync
-rhdSyncLink();
-  
+ // Sync link database
+ rhdSyncLink();
+ 
+ 
   
   return 0;
 }
@@ -412,7 +413,26 @@ int getDatabaseVariable(char type, const char * name)
 
 
 
-
+extern int getDatabaseVariableLink(char type, const char * name)
+{ // get index of a variable in the database
+  symTableElement * syms;
+  int symsCnt;
+  int result = -1;
+  int i;
+  //
+  syms = getSymbolTableLink(type);
+  symsCnt = getSymbolTableSizeLink(type);
+  for (i = 0; i < symsCnt; i++)
+  {
+    if (strcmp(syms->name, name) == 0)
+    {
+      result = i;
+      break;
+    }
+    syms++;
+  }
+  return result;
+}
 
 
 

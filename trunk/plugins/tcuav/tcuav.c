@@ -93,7 +93,7 @@ int debugFlag = 0;
 struct timeval tickTime;
 
 int x,y; 
-int varPhi, varForce,varR, varSpeedZ, varSpeedLR, varSpeedFwd, varSpeedSpin; // Database variable
+int varPhi, varForce,varR, varSpeedZ, varSpeedLR, varSpeedFwd, varSpeedSpin, varCableLength; // Database variable
 double phi,r;
 
 
@@ -140,6 +140,7 @@ void createVariables()
 { // create variables in RHD
   varPhi = createVariable('r',1,"phi"); // Angle
   varR = createVariable('r',1,"r"); // combined force
+  varCableLength = createVariable('r',1,"cableLength");
   varSpeedZ = createVariable('w',1,"speedZ"); // Joystick speed up/down
   varSpeedFwd = createVariable('w',1,"speedFwd"); // Joystick speed Fwd/Back
   varSpeedSpin = createVariable('w',1,"speedSpin"); // Joystick speed spin

@@ -37,6 +37,8 @@
 
 //RHD Core headers
 #include <rhd.h>
+#include "../rhdlink/rhdlink.h"
+#include "../rhdlink/librhdlink.h"
 #include <smr.h>
 #include <database.h>
 #include <globalfunc.h>
@@ -52,6 +54,7 @@ typedef struct  {
     char found;
   } parseInfo;
 
+  
 /* prototypes */
 void createVariables();
 int init(void);
@@ -61,6 +64,12 @@ int init(void);
  * \param name is the name of the variable
  * \returns -1 if the variable is not found, else the index (positive or zero) of the variable. */
 int getDatabaseVariable(char type, const char * name);
+
+// Magic definitions 
+//int getDatabaseVariableLink(char type, const char * name);
+//symTableElement*  getSymbolTableLink(char);
+//int getSymbolTableSizeLink(char);
+
 /// Parsing function for start tag
 void XMLCALL lsStartTag(void *, const char *, const char **);
 /// parsing function for end tag
@@ -68,7 +77,7 @@ void XMLCALL lsEndTag(void *, const char *);
 
 
 /// round a float to an integer
-int roundi(const float v)
+int roundi(const float v) 
 { // round to closest integer
   if (v > 0)
     return (int)(v + 0.5);
@@ -93,7 +102,11 @@ int debugFlag = 0;
 struct timeval tickTime;
 
 int x,y,z; 
-int varPhi, varForce,varR, varTheta; // Database variable
+int RHDLinkConnected = 0;
+int varRHDLinkConnected;
+int varPhiGCS,varRGCS,varCableLengthGCS; // vars from rhd link (Ground Control Station)
+int varR,varPhi,varForce, varTheta; // Database variable
+double phiGCS,rGCS,cableLength; // vars from RHDlink (Ground Control Station)
 double phi,r,theta;
 
 
@@ -106,16 +119,26 @@ extern int periodic(int rhdTick)
 {
   tick = rhdTick;
   
-  // 1. Get Phidgets values
+  // 1. Get Phidgets values, Get RHD link variables
   // 2. Calculate
   // 3. Update database 
   
-  // 1. Get Phidgets values
+  // 1. Get Phidgets values and RHD link
   varForce = getDatabaseVariable('r', "force"); // scaled by 10000
   symTableElement *st = getSymtable('r');
   x = st[varForce].data[1];
   y = st[varForce].data[0];
   z = st[varForce].data[2];
+  
+  // RHD LINK
+  varRGCS = getDatabaseVariableLink('r',"r");
+  varPhiGCS = getDatabaseVariableLink('r',"r");
+  varCableLengthGCS = getDatabaseVariableLink('r',"r");
+  
+  symTableElement *stLink = getSymbolTableLink('r');
+  rGCS = stLink[varRGCS].data[0];
+  phiGCS = stLink[varPhiGCS].data[0];
+  cableLength = stLink[varCableLengthGCS].data[0];
   
   // 2. Calculate translate to angle
   r = sqrt(pow(x/10000,2)+pow(y/10000,2)+pow(z/10000,2));
@@ -142,6 +165,12 @@ void createVariables()
   varPhi = createVariable('r',1,"phi"); // Angle
   varR = createVariable('r',1,"r"); // combined force
   varTheta = createVariable('r',1,"theta"); // Angle
+  
+  // RHD link vars
+  varRHDLinkConnected = createVariable('r',1,"RHDLinkConnected");
+  varPhiGCS = createVariable('w',1,"phiLink");
+  varRGCS = createVariable('w',1,"RLink");
+  varCableLengthGCS = createVariable('w',1,"cableLengthLink");
   
   printf(PLUGINNAME ": has created read and write variables\n");
 }

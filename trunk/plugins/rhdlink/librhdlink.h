@@ -74,8 +74,8 @@
   char              rhdDisconnectLink(void);
   char              rhdConnectLink(char, char *, int);
   char              rhdSyncLink(void);
-  symTableElement*  getSymbolTableLink(char);
-  int               getSymbolTableSizeLink(char);
+  extern symTableElement*  getSymbolTableLink(char);
+  extern int               getSymbolTableSizeLink(char);
   int               readValueLink(int, int);
   int               readValueNamedLink(char *, int);
   int *             readArrayLink(int);

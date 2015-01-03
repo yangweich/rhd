@@ -40,6 +40,15 @@
       >
     </phidgetsbridge2>  
     
+    <rhdlink enable="true"
+      lib="rhdlink.so.1"
+      debug="true"
+      remoteHost="127.0.0.1"
+      port="24902"
+      access="w"
+      >
+    </rhdlink>
+    
     <!-- Flight Control System - Tether Control of UAV -->
     <fcs 
 	    enable= "true"

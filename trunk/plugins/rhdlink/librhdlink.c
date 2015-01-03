@@ -1,16 +1,18 @@
-/** \file librhd.c
+/** \file librhdlink.c
  *  \brief Robot Hardware Daemon Library
  *  Socket interface to the Robot Hardware Daemon HAL 
  * 
- *  This files has changed variable and function names in order to work with RHD link plugin.
+ *  This files is based on librhd.c(Version 2.2 rev 1963) and has changed variable and function names in order to work with RHD link plugin.
+ *  All function names has *Link in suffix.
+ *  Global variables has been put in  a struct rhdlink_t
  *
- *  \author Anders Billesø Beck
- *  $Rev: 1963 $
- *  $Date: 2012-07-28 19:16:28 +0200 (Sat, 28 Jul 2012) $
+ *  \author Peter Juhl Savnik
+ *  \date 2015 January
+ *  
  */
  /***************************************************************************
- *                  Copyright 2008 Anders Billesø Beck                     *
- *                       anders.beck@get2net.dk                            *
+ *                  Copyright 2015 Peter Juhl Savnik                       *
+ *                       s113556@student.dtu.dk                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Lesser General Public License as        *
@@ -52,17 +54,19 @@
 //Enable debug printouts
 #define DEBUG 0
 
-/** Variables definitions **/
-int32_t         rhdSocket;
-int32_t         *rData, *wData;
-int32_t         *ioData, *ioPtr; //32-bit pointers to io-buffer
-int8_t			 *ioBuf, *ioBufPtr;//8-bit io-buffer
-int32_t         rTableLen = 0, wTableLen = 0;
-int32_t         rDataLen = 0, wDataLen = 0;
-char            connected = 0;
-int             temp;
-symTableElement *rSymTableLink, *wSymTableLink;
-
+/** Struct containning all global variables, allows to create multiple rhd link **/
+typedef struct{
+  int32_t         rhdSocket;
+  int32_t         *rData, *wData;
+  int32_t         *ioData, *ioPtr; //32-bit pointers to io-buffer
+  int8_t	  *ioBuf, *ioBufPtr; //8-bit io-buffer
+  int32_t         rTableLen, wTableLen;
+  int32_t         rDataLen, wDataLen;
+  char            connected;
+  int             temp;
+  symTableElement *rSymTableLink, *wSymTableLink;
+} rhdLink_t;
+  
 /** Private function definitions **/
 int rhdPackageParser(void);
 int recieveSymboltable(char);
@@ -73,6 +77,18 @@ int loadTxBuffer(void *, int);
 ssize_t secureWrite(int fd, const void *buf, ssize_t txLen);
 ssize_t secureRead(int fd, void *buf, ssize_t txLen);
 
+
+/** Variables definitions **/
+rhdLink_t rhdLink;
+
+/** Define initial condition **/
+/*rhdLink.rTableLen = 0;
+rhdLink.wTableLen = 0;
+rhdLink.rDataLen = 0;
+rhdLink.wDataLen = 0;
+rhdLink.connected = 0;
+*/
+
 /** \brief Disconnect from RHD Server
  *
  * \returns char succes
@@ -80,26 +96,26 @@ ssize_t secureRead(int fd, void *buf, ssize_t txLen);
  */
 char rhdDisconnectLink(void) {
 
-  if (connected == 0)
+  if (rhdLink.connected == 0)
     /* connected already */
     return -1;
   /* Disconnect */
-  connected = 0;
-  close(rhdSocket);
+  rhdLink.connected = 0;
+  close(rhdLink.rhdSocket);
   /* set table length to zero */
-  rTableLen = 0;
-  wTableLen = 0;
-  rDataLen = 0;
-  wDataLen = 0;
+  rhdLink.rTableLen = 0;
+  rhdLink.wTableLen = 0;
+  rhdLink.rDataLen = 0;
+  rhdLink.wDataLen = 0;
   /* Free allocated memory */
-  free(rSymTableLink);
-  rSymTableLink = 0;
-  free(wSymTableLink);
-  wSymTableLink = 0;
-  free(rData);
-  rData = 0;
-  free(wData);
-  wData = 0;
+  free(rhdLink.rSymTableLink);
+  rhdLink.rSymTableLink = 0;
+  free(rhdLink.wSymTableLink);
+  rhdLink.wSymTableLink = 0;
+  free(rhdLink.rData);
+  rhdLink.rData = 0;
+  free(rhdLink.wData);
+  rhdLink.wData = 0;
 
   return 1;
 
@@ -135,9 +151,9 @@ char rhdConnectLink(char rw, char *hostname, int port) {
   }
 
   //Disconnect if already connected
-  if (connected) {
+  if (rhdLink.connected) {
     rhdDisconnectLink();
-    connected = 0;
+    rhdLink.connected = 0;
   }
 
   /*if (!hostname) {
@@ -168,19 +184,19 @@ char rhdConnectLink(char rw, char *hostname, int port) {
   sa.sin_port = htons(port ? port : DEFAULTPORT);
 
   //Connect to server and configure socket connection
-  if ((rhdSocket = socket(PF_INET, SOCK_STREAM, 0)) < 0)  {
+  if ((rhdLink.rhdSocket = socket(PF_INET, SOCK_STREAM, 0)) < 0)  {
       perror("RHD Client: socket");
       return -1;
   }
 
-  if (connect(rhdSocket, (struct sockaddr *)&sa, sizeof(sa)))  {
+  if (connect(rhdLink.rhdSocket, (struct sockaddr *)&sa, sizeof(sa)))  {
       //perror("RHD Client: connect");
-      close(rhdSocket);
+      close(rhdLink.rhdSocket);
       return -1;
   }
 
   int x = 1;
-  if (setsockopt(rhdSocket, SOL_TCP, TCP_NODELAY, &x, sizeof(x))) {
+  if (setsockopt(rhdLink.rhdSocket, SOL_TCP, TCP_NODELAY, &x, sizeof(x))) {
     perror("RHD Client: setsockopt - TCP NODELAY");
   }
 
@@ -188,7 +204,7 @@ char rhdConnectLink(char rw, char *hostname, int port) {
   	char dirReq[2] = {'a', 0};
 	dirReq[1] = rw; //Assign direction request
   //Send Direction request to server
-  if (secureWrite(rhdSocket, &dirReq, sizeof(char)*2) < 0) {
+  if (secureWrite(rhdLink.rhdSocket, &dirReq, sizeof(char)*2) < 0) {
     fprintf(stderr,"RHD Client: Error handshaking server\n");
     return -1;
   }
@@ -196,24 +212,24 @@ char rhdConnectLink(char rw, char *hostname, int port) {
   //Run the package parser to recieve acknowledgement and symboltables
 	if (rhdPackageParser() <= 0) {
 		fprintf(stderr, "RHD Client: Fatal error recieving RHD Handshake packages, closing socket\n");
-		close(rhdSocket);
-		connected = 0;
+		close(rhdLink.rhdSocket);
+		rhdLink.connected = 0;
 		return -1;		
 	}
 
 
 	//Reset all updated flags in buffer (as all data is transferred in first handshake)
-	for(i = 0; i < rTableLen; i++) rSymTableLink[i].updated = 0;
-	for(i = 0; i < wTableLen; i++) wSymTableLink[i].updated = 0;
+	for(i = 0; i < rhdLink.rTableLen; i++) rhdLink.rSymTableLink[i].updated = 0;
+	for(i = 0; i < rhdLink.wTableLen; i++) rhdLink.wSymTableLink[i].updated = 0;
 
-  if (connected <= 0) {
+  if (rhdLink.connected <= 0) {
     fprintf(stderr, "RHD Client: Fatal error in RHD Server handshake, closing socket \n");
-    close(rhdSocket);
-    connected = 0;
+    close(rhdLink.rhdSocket);
+    rhdLink.connected = 0;
     return -1;
   }
 
-  return connected;
+  return rhdLink.connected;
 
 }
 
@@ -237,16 +253,16 @@ char rhdSyncLink(void) {
 	printf("DEBUG: Starting Sync\n");
 #endif
 
-	if (!connected) return -1;
+	if (!rhdLink.connected) return -1;
 
-	ioBufPtr = ioBuf; //Clear io buffer pointer for new tx package
+	rhdLink.ioBufPtr = rhdLink.ioBuf; //Clear io buffer pointer for new tx package
 
 	//Create the ready-package and set rr / rw, then load to ioBuffer
-	readyPkgType[1] = connected; //Update ready-checkin package type
+	readyPkgType[1] = rhdLink.connected; //Update ready-checkin package type
 	loadTxBuffer(readyPkgType,sizeof(char)*2); //Load to buffer
 
 	//Transmit write variables if write access is granted
-	if (connected == 'w') {
+	if (rhdLink.connected == 'w') {
 		#if DEBUG
 		printf("DEBUG: Transmitting write package\n");
 		#endif
@@ -264,8 +280,8 @@ char rhdSyncLink(void) {
 #endif
 
   //Reset all updated flags in buffer
-  for(i = 0; i < rTableLen; i++) rSymTableLink[i].updated = 0;
-  for(i = 0; i < wTableLen; i++) wSymTableLink[i].updated = 0;
+  for(i = 0; i < rhdLink.rTableLen; i++) rhdLink.rSymTableLink[i].updated = 0;
+  for(i = 0; i < rhdLink.wTableLen; i++) rhdLink.wSymTableLink[i].updated = 0;
 
   //Run the RHD package parser to recieve data from RHD Server
   if (rhdPackageParser() <= 0) {
@@ -289,7 +305,7 @@ int rhdPackageParser(void) {
   //Reciever loop - Keeps recieving RHD packages until end-of-package is recieved
   while (!end) {
     //Recieve package type for parsing
-    if (secureRead(rhdSocket,&pkgType,sizeof(char) * 2) <= 0) {
+    if (secureRead(rhdLink.rhdSocket,&pkgType,sizeof(char) * 2) <= 0) {
     return -1;
     }
 
@@ -302,7 +318,7 @@ int rhdPackageParser(void) {
           #if DEBUG
           printf("DEBUG: Received connect package %c%c\n",pkgType[0],pkgType[1]);
           #endif
-          connected = pkgType[1];
+          rhdLink.connected = pkgType[1];
         } else {
           return -1;
         }
@@ -362,16 +378,16 @@ int recieveSymboltable(char dir) {
   int i = 0, tempTableSize = 0, tempDataSize = 0;
   //Select the dataPools for read/write
   if (dir == 'w') {
-    tempTable = wSymTableLink;
-    tempDatapool = wData;
+    tempTable = rhdLink.wSymTableLink;
+    tempDatapool = rhdLink.wData;
   } else if (dir == 'r') {
-    tempTable = rSymTableLink;
-    tempDatapool = rData;
+    tempTable = rhdLink.rSymTableLink;
+    tempDatapool = rhdLink.rData;
   } else {
     return -1;
   }
   //Recieve size of symbol table from client and allocate memory for it
-  if(secureRead(rhdSocket,&tempTableSize,sizeof(int32_t)) <= 0) 
+  if(secureRead(rhdLink.rhdSocket,&tempTableSize,sizeof(int32_t)) <= 0) 
     return -1;
   tempTableSize = ntohl(tempTableSize);
   tempTable = realloc(tempTable,(tempTableSize * sizeof(symTableElement)));
@@ -383,9 +399,9 @@ int recieveSymboltable(char dir) {
   memset(tempTable,0,(tempTableSize * sizeof(symTableElement)));
   //Recieve the table and restore host byteorder in selected elements
   for(i = 0; (i < tempTableSize); i++) {
-    if(secureRead(rhdSocket,&tempElement.length,sizeof(tempElement.length)) <= 0) 
+    if(secureRead(rhdLink.rhdSocket,&tempElement.length,sizeof(tempElement.length)) <= 0) 
       return -1;
-    if(secureRead(rhdSocket,&tempElement.name,sizeof(tempElement.name)) <= 0) 
+    if(secureRead(rhdLink.rhdSocket,&tempElement.name,sizeof(tempElement.name)) <= 0) 
       return -1;
     //Copy to temp struct and perform ntohl on required values
     tempElement.length = ntohl(tempElement.length);
@@ -411,32 +427,32 @@ int recieveSymboltable(char dir) {
 
   //Reassign buffer pointers and sizes
   if (dir == 'w') {
-    wSymTableLink = tempTable;
-    wData = tempDatapool;
-    wTableLen = tempTableSize;
-    wDataLen = tempDataSize;
+    rhdLink.wSymTableLink = tempTable;
+    rhdLink.wData = tempDatapool;
+    rhdLink.wTableLen = tempTableSize;
+    rhdLink.wDataLen = tempDataSize;
     //Allocate memory for the transmission datapool (header + n*(id + data))
-    ioBuf = realloc(ioBuf,(wDataLen + 3 + wTableLen)  * sizeof(int32_t));
-    if(ioBuf == NULL) {
+    rhdLink.ioBuf = realloc(rhdLink.ioBuf,(rhdLink.wDataLen + 3 + rhdLink.wTableLen)  * sizeof(int32_t));
+    if(rhdLink.ioBuf == NULL) {
       fprintf(stderr,"RHD Client: Error allocating memory for ioDatapool\n");
       return -1;
     }
-    ioData = (int32_t *)(ioBuf+2); //Leave 2 bytes in ioBuf for package type
-    memset(ioBuf,0,(wDataLen + 3 + wTableLen)  * sizeof(int32_t));
+    rhdLink.ioData = (int32_t *)(rhdLink.ioBuf+2); //Leave 2 bytes in ioBuf for package type
+    memset(rhdLink.ioBuf,0,(rhdLink.wDataLen + 3 + rhdLink.wTableLen)  * sizeof(int32_t));
   } else {
-    rSymTableLink = tempTable;
-    rData = tempDatapool;
-    rTableLen = tempTableSize;
-    rDataLen = tempDataSize;
+    rhdLink.rSymTableLink = tempTable;
+    rhdLink.rData = tempDatapool;
+    rhdLink.rTableLen = tempTableSize;
+    rhdLink.rDataLen = tempDataSize;
     //Allocate memory for the transmission datapool (header + n*(id + data))
-    if ((wDataLen + 3 + wTableLen) < (rDataLen + 3 + rTableLen))
-      ioBuf = realloc(ioBuf,(rDataLen + 3 + tempTableSize)  * sizeof(int32_t));
-    if(ioBuf == NULL) {
+    if ((rhdLink.wDataLen + 3 + rhdLink.wTableLen) < (rhdLink.rDataLen + 3 + rhdLink.rTableLen))
+      rhdLink.ioBuf = realloc(rhdLink.ioBuf,(rhdLink.rDataLen + 3 + tempTableSize)  * sizeof(int32_t));
+    if(rhdLink.ioBuf == NULL) {
       fprintf(stderr,"RHD Client: Error allocating memory for ioDatapool\n");
       return -1;
     }
-    ioData = (int32_t *)(ioBuf+2); //Leave 2 bytes in ioBuf for package type
-    memset(ioBuf,0,(rDataLen + 3 + tempTableSize)  * sizeof(int32_t));
+    rhdLink.ioData = (int32_t *)(rhdLink.ioBuf+2); //Leave 2 bytes in ioBuf for package type
+    memset(rhdLink.ioBuf,0,(rhdLink.rDataLen + 3 + tempTableSize)  * sizeof(int32_t));
   }
   return 1;
 }
@@ -456,17 +472,17 @@ int recieveDatapackage (char dir) {
 
   //Select the dataPools for read/write
   if (dir == 'w') {
-    tempTable = wSymTableLink;
+    tempTable = rhdLink.wSymTableLink;
     //tempDatapool = wData;
   } else if (dir == 'r') {
-    tempTable = rSymTableLink;
+    tempTable = rhdLink.rSymTableLink;
     //tempDatapool = rData;
   } else {
 	  return -1;
   }
 
   //Read size of sync package from server
-  if (secureRead(rhdSocket,&pkgSize,sizeof(int32_t)) <= 0) {
+  if (secureRead(rhdLink.rhdSocket,&pkgSize,sizeof(int32_t)) <= 0) {
       return -1;
   }
   pkgSize = ntohl(pkgSize); //Convert to host-order
@@ -474,26 +490,26 @@ int recieveDatapackage (char dir) {
   //Recieve updated packages from server
   for(; pkgSize > 0; pkgSize--) {
       //Read variable id
-      if (secureRead(rhdSocket,ioData,sizeof(int32_t)) <= 0) {
+      if (secureRead(rhdLink.rhdSocket,rhdLink.ioData,sizeof(int32_t)) <= 0) {
         return -1;
       }
-      ioData[0] = ntohl(ioData[0]); //Convert to host order
+      rhdLink.ioData[0] = ntohl(rhdLink.ioData[0]); //Convert to host order
 
       //Read variable data
-      if (secureRead(rhdSocket,(ioData+1),sizeof(struct timeval) + (tempTable[ioData[0]].length * sizeof(int32_t))) <= 0) {
+      if (secureRead(rhdLink.rhdSocket,(rhdLink.ioData+1),sizeof(struct timeval) + (tempTable[rhdLink.ioData[0]].length * sizeof(int32_t))) <= 0) {
         return -1;
       }
 
       //Convert and write timestamp
-      tempTable[ioData[0]].timestamp->tv_sec = ntohl(ioData[1]);
-      tempTable[ioData[0]].timestamp->tv_usec = ntohl(ioData[2]);
+      tempTable[rhdLink.ioData[0]].timestamp->tv_sec = ntohl(rhdLink.ioData[1]);
+      tempTable[rhdLink.ioData[0]].timestamp->tv_usec = ntohl(rhdLink.ioData[2]);
       //Convert data to host-byteorder and copy to rDatabuffer.
-      d = tempTable[ioData[0]].data;
+      d = tempTable[rhdLink.ioData[0]].data;
       u = 0;
-      for(i = 0; (i <  tempTable[ioData[0]].length); i++) {
+      for(i = 0; (i <  tempTable[rhdLink.ioData[0]].length); i++) {
         //ioData [0]=size, [1]+[2] = timeval [3]... = data
         //(to explain strange array index below)
-        v = ntohl(ioData[i + sizeof(struct timeval)/sizeof(int32_t) + 1]);
+        v = ntohl(rhdLink.ioData[i + sizeof(struct timeval)/sizeof(int32_t) + 1]);
         if (v != *d)
         {
           *d = v;
@@ -502,10 +518,10 @@ int recieveDatapackage (char dir) {
         d++;
       }
       // Mark variable as changed if so
-      tempTable[ioData[0]].changed = u;
+      tempTable[rhdLink.ioData[0]].changed = u;
       // mark read variables as updated (data source is alive and setting data)
       if (dir == 'r') 
-        tempTable[ioData[0]].updated = 1;
+        tempTable[rhdLink.ioData[0]].updated = 1;
   }
   return 1;
 }
@@ -522,24 +538,24 @@ int transmitWritepackage (void) {
 	loadTxBuffer("dw",sizeof(char)*2);
 
 	//Set ioPtr
-	ioData = (int32_t *) ioBufPtr;
-	ioPtr  = ioData + 1; //Skip the first place for variable counter
+	rhdLink.ioData = (int32_t *) rhdLink.ioBufPtr;
+	rhdLink.ioPtr  = rhdLink.ioData + 1; //Skip the first place for variable counter
 
 	//Clear the variable count (first place in the buffer)
-	ioData[0] = 0;
+	rhdLink.ioData[0] = 0;
 
-	for(i = 0; i < wTableLen; i++) {
-		if (wSymTableLink[i].updated >= 1) {
-			*ioPtr = i; //Save index
-			ioPtr++;    //Move pointer
+	for(i = 0; i < rhdLink.wTableLen; i++) {
+		if (rhdLink.wSymTableLink[i].updated >= 1) {
+			*rhdLink.ioPtr = i; //Save index
+			rhdLink.ioPtr++;    //Move pointer
 			//Copy timestamp
-			memcpy(ioPtr, wSymTableLink[i].timestamp, sizeof(struct timeval));
-			ioPtr += sizeof(struct timeval) / sizeof(int32_t);
+			memcpy(rhdLink.ioPtr, rhdLink.wSymTableLink[i].timestamp, sizeof(struct timeval));
+			rhdLink.ioPtr += sizeof(struct timeval) / sizeof(int32_t);
 			//Copy data
-			memcpy(ioPtr, wSymTableLink[i].data, wSymTableLink[i].length * sizeof(int32_t));
-			ioPtr += wSymTableLink[i].length;
-			ioData[0]++;
-			wSymTableLink[i].updated = 0; //Remove updated mark
+			memcpy(rhdLink.ioPtr, rhdLink.wSymTableLink[i].data, rhdLink.wSymTableLink[i].length * sizeof(int32_t));
+			rhdLink.ioPtr += rhdLink.wSymTableLink[i].length;
+			rhdLink.ioData[0]++;
+			rhdLink.wSymTableLink[i].updated = 0; //Remove updated mark
 		}
 	}
 
@@ -551,12 +567,12 @@ int transmitWritepackage (void) {
 #endif
 
 	//Transform all to network byteorder
-	for(i = 0; i < (ioPtr - ioData); i++) {
-		ioData[i] = htonl(ioData[i]);
+	for(i = 0; i < (rhdLink.ioPtr - rhdLink.ioData); i++) {
+		rhdLink.ioData[i] = htonl(rhdLink.ioData[i]);
 	}
 
 	//Set ioBufPtr to match filled buffer
-	ioBufPtr = (int8_t *) ioPtr;
+	rhdLink.ioBufPtr = (int8_t *) rhdLink.ioPtr;
 
 #if DEBUG
 	printf("DEBUG: Size at network order: %d ",ioData[0]);
@@ -580,12 +596,12 @@ int transmitWritepackage (void) {
 int loadTxBuffer(void *dataPtr, int dataLen) {
 
 	#if DEBUG
-	printf("Buffering[%d] (%p): ",dataLen,ioBufPtr);
+	printf("Buffering[%d] (%p): ",dataLen,rhdLink.ioBufPtr);
 	#endif
-	memcpy(ioBufPtr, dataPtr, dataLen);
-	ioBufPtr += dataLen; //shift bufferplace
+	memcpy(rhdLink.ioBufPtr, dataPtr, dataLen);
+	rhdLink.ioBufPtr += dataLen; //shift bufferplace
 	#if DEBUG
-	printf("| (%p) len:%d\n",ioBufPtr,(int)(ioBufPtr-ioBuf));
+	printf("| (%p) len:%d\n",rhdLink.ioBufPtr,(int)(rhdLink.ioBufPtr-rhdLink.ioBuf));
 	#endif
 
 	return 1;
@@ -604,12 +620,12 @@ int transmitTxBuffer(void) {
 	loadTxBuffer(&endPkgType,2); //Add end-package typeTag
 	
 	//Transmit databuffer to client
-   if (secureWrite(rhdSocket,ioBuf,(ssize_t)(ioBufPtr - ioBuf)) <= 0) {
-				ioBufPtr = ioBuf;//Reset pointers
+   if (secureWrite(rhdLink.rhdSocket,rhdLink.ioBuf,(ssize_t)(rhdLink.ioBufPtr - rhdLink.ioBuf)) <= 0) {
+				rhdLink.ioBufPtr = rhdLink.ioBuf;//Reset pointers
 				return -1;
    }
 
-	ioBufPtr = ioBuf; //Reset pointers
+	rhdLink.ioBufPtr = rhdLink.ioBuf; //Reset pointers
 	return 1;
 
 }
@@ -665,9 +681,9 @@ ssize_t secureRead(int fd, void *buf, ssize_t txLen) {
 symTableElement*  getSymbolTableLink(char dir) {
 
   if (dir == 'r') {
-    return (symTableElement *) rSymTableLink;
+    return (symTableElement *) rhdLink.rSymTableLink;
   } else if (dir == 'w') {
-    return (symTableElement *) wSymTableLink;
+    return (symTableElement *) rhdLink.wSymTableLink;
   } else return NULL;
 }
 
@@ -684,9 +700,9 @@ symTableElement*  getSymbolTableLink(char dir) {
 int getSymbolTableSizeLink(char dir) {
 
   if (dir == 'r') {
-    return rTableLen;
+    return rhdLink.rTableLen;
   } else if (dir == 'w') {
-    return wTableLen;
+    return rhdLink.wTableLen;
   } else return -1;
 
 }
@@ -710,13 +726,13 @@ int writeValueLink(int id, int index, int value) {
 //	printf("Writing value: %s\n",wSymTable[id].name);
 
   //Check bounds of update
-  if ((id < 0) || (id >= wTableLen) || (index < 0) || 
-      (index > wSymTableLink[id].length)) {
+  if ((id < 0) || (id >= rhdLink.wTableLen) || (index < 0) || 
+      (index > rhdLink.wSymTableLink[id].length)) {
     return -1;
   }
-  wSymTableLink[id].data[index] = value;
-  wSymTableLink[id].updated = 1;
-  gettimeofday(wSymTableLink[id].timestamp,NULL);
+  rhdLink.wSymTableLink[id].data[index] = value;
+  rhdLink.wSymTableLink[id].updated = 1;
+  gettimeofday(rhdLink.wSymTableLink[id].timestamp,NULL);
 
   return 1;
 
@@ -739,8 +755,8 @@ int writeValueLink(int id, int index, int value) {
 int writeValueNamedLink(char *varName, int index, int value) {
 
     int i;
-    for (i = 0; i < wTableLen; i++) {
-      if (!strcmp(varName,wSymTableLink[i].name)) {
+    for (i = 0; i < rhdLink.wTableLen; i++) {
+      if (!strcmp(varName,rhdLink.wSymTableLink[i].name)) {
         return writeValueLink(i,index,value);
       }
     }
@@ -766,13 +782,13 @@ int writeValueNamedLink(char *varName, int index, int value) {
 int writeArrayLink(int id, int length, int* array) {
   
 //Check bounds of update
-  if ((id < 0) || (id >= wTableLen) || (length < 0) || 
-      (length > wSymTableLink[id].length)) {
+  if ((id < 0) || (id >= rhdLink.wTableLen) || (length < 0) || 
+      (length > rhdLink.wSymTableLink[id].length)) {
     return -1;
   }
-  memcpy(wSymTableLink[id].data, array, length * sizeof(int32_t));
-  wSymTableLink[id].updated = 1;
-  gettimeofday(wSymTableLink[id].timestamp,NULL);
+  memcpy(rhdLink.wSymTableLink[id].data, array, length * sizeof(int32_t));
+  rhdLink.wSymTableLink[id].updated = 1;
+  gettimeofday(rhdLink.wSymTableLink[id].timestamp,NULL);
 
   return 1;
 }
@@ -794,8 +810,8 @@ int writeArrayLink(int id, int length, int* array) {
 int writeArrayNamed(char *arrayName, int length, int* array) {
 
     int i;
-    for (i = 0; i < wTableLen; i++) {
-      if (!strcmp(arrayName,wSymTableLink[i].name)) {
+    for (i = 0; i < rhdLink.wTableLen; i++) {
+      if (!strcmp(arrayName,rhdLink.wSymTableLink[i].name)) {
         return writeArrayLink(i,length,array);
       }
     }
@@ -817,11 +833,11 @@ int writeArrayNamed(char *arrayName, int length, int* array) {
 int readValueLink(int id, int index) {
   
   //Check bounds of update
-  if ((id < 0) || (id >= rTableLen) || (index < 0) || 
-      (index > rSymTableLink[id].length)) {
+  if ((id < 0) || (id >= rhdLink.rTableLen) || (index < 0) || 
+      (index > rhdLink.rSymTableLink[id].length)) {
     return 0;
   }
-  return rSymTableLink[id].data[index];
+  return rhdLink.rSymTableLink[id].data[index];
 }
 
 /** \brief Read named variable from the datapool
@@ -834,8 +850,8 @@ int readValueLink(int id, int index) {
   int readValueNamedLink(char *valName, int index) {
   
     int i;
-    for (i = 0; i < rTableLen; i++) {
-      if (!strcmp(valName,rSymTableLink[i].name)) {
+    for (i = 0; i < rhdLink.rTableLen; i++) {
+      if (!strcmp(valName,rhdLink.rSymTableLink[i].name)) {
         return readValueLink(i,index);
       }
     }
@@ -852,10 +868,10 @@ int readValueLink(int id, int index) {
  */
 int*  readArrayLink(int id) {
   //Check bounds of update
-  if ((id < 0) || (id >= rTableLen)) {
+  if ((id < 0) || (id >= rhdLink.rTableLen)) {
     return NULL;
   }
-  return (int32_t*)rSymTableLink[id].data;
+  return (int32_t*)rhdLink.rSymTableLink[id].data;
 }
 
 /** \brief Read named array from the datapool
@@ -868,8 +884,8 @@ int*  readArrayLink(int id) {
   int * readArrayNamedLink(char *arrayName) {
   
     int i;
-    for (i = 0; i < rTableLen; i++) {
-      if (!strcmp(arrayName,rSymTableLink[i].name)) {
+    for (i = 0; i < rhdLink.rTableLen; i++) {
+      if (!strcmp(arrayName,rhdLink.rSymTableLink[i].name)) {
         return readArrayLink(i);
       }
     }
@@ -887,8 +903,8 @@ int*  readArrayLink(int id) {
  */
 int isReadLink(int id) {
 
-  if (id >= rTableLen) return -1;
-  else return rSymTableLink[id].updated;
+  if (id >= rhdLink.rTableLen) return -1;
+  else return rhdLink.rSymTableLink[id].updated;
   
 }
 
@@ -902,8 +918,8 @@ int isReadLink(int id) {
 int isReadNamedLink(char *varName) {
 
   int i;
-  for (i = 0; i < rTableLen; i++) {
-    if (!strcmp(varName,rSymTableLink[i].name)) {
+  for (i = 0; i < rhdLink.rTableLen; i++) {
+    if (!strcmp(varName,rhdLink.rSymTableLink[i].name)) {
       return isReadLink(i);
     }
   }
@@ -911,7 +927,6 @@ int isReadNamedLink(char *varName) {
   return -1;  
 
 }
-
 
 
 

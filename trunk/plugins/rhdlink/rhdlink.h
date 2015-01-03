@@ -32,6 +32,7 @@
   extern int initXML(char*);
   extern int periodic(int );
   extern int terminate(void);
+  extern int getDatabaseVariableLink(char type, const char * name);
 
 #endif
 
