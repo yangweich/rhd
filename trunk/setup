@@ -48,9 +48,9 @@ export PINS=/sys/kernel/debug/pinctrl/44e10800.pinmux/pins
 
 echo "Setup Device Tree"
 # Create device tree
-cp plugins/tcuav/overlay
+cd plugins/tcuav/overlay
 ./build
-cp ../../../
+cd ../../../
 # Copy device tree to firmware
 
 cp plugins/tcuav/overlay/DM-GPIO-Test-00A0.dtbo /lib/firmware/

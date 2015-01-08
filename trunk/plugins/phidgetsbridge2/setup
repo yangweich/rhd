@@ -8,7 +8,6 @@
 echo "	* Setting up Phidget Library"
 echo "	* Unpack"
 tar -xzf libphidget_2.1.8.20140319.tar.gz
-rm libphidget_2.1.8.20140319.tar.gz
 cd libphidget-2.1.8.20140319
 echo "	* Configre"
 ./configure --disable-jni
