@@ -57,8 +57,11 @@ cd ../../../
 
 cp plugins/tcuav/overlay/DM-GPIO-Test-00A0.dtbo /lib/firmware/
 
+echo "Enable am33xx_pwm"
 echo am33xx_pwm > $SLOTS
+echo "Enable DM-GPIO-Test"
 echo DM-GPIO-Test > $SLOTS
+echo "Enable bone_pwm_P9_14"
 echo bone_pwm_P9_14 > $SLOTS
 
 cat $SLOTS
