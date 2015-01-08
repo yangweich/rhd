@@ -14,8 +14,8 @@ echo ""
 
 echo "*** Update Repos ***"
 echo ""
-apt-get update
-apt-get upgrade
+#apt-get update
+#apt-get upgrade
 
 echo ""
 echo "*** Installing packages ***"
