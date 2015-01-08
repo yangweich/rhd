@@ -146,7 +146,7 @@ extern int periodic(int rhdTick)
   }
    
   pwm_set_duty(roundi(abs(speedZ)*(5000000/5000))); // speed*(DUTY/MAX_JOYSTICK)
-  
+  printf("%d\n",roundi(abs(speedZ)*(5000000/5000))); 
   
   
   // 3. Update database
