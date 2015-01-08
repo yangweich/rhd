@@ -6,6 +6,11 @@
 # 2015
 
 echo ""
+echo "*** Setting up Network ***"
+echo ""
+/sbin/route add default gw 192.168.7.1
+
+echo ""
 echo "*** Setting up IO ***"
 echo ""
 # Create links $SLOTS and $PINS
