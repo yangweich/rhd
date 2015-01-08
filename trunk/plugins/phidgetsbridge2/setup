@@ -2,7 +2,7 @@
 echo "	* Setting up Phidget Library"
 echo "	* Unpack"
 tar -xzf libphidget_2.1.8.20140319.tar.gz
-cd libphidget_2.1.8.20140319
+cd libphidget-2.1.8.20140319
 echo "	* Configre"
 ./configure
 echo "	* Make"
