@@ -20,7 +20,7 @@ int pwm_set_duty(unsigned int duty)
 
 	fd = open(SYSFS_PWM_DIR "/duty", O_WRONLY);
 	if (fd < 0) {
-		perror("/duty");
+		perror(SYSFS_PWM_DIR "/duty");
 		return fd;
 	}
 
