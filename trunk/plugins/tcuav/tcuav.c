@@ -95,7 +95,7 @@ int debugFlag = 0;
 struct timeval tickTime;
 
 int x,y; 
-int varPhi, varForce,varR, varSpeedZ, varSpeedLR, varSpeedFwd, varSpeedSpin, varCableLength; // Database variable
+int varPhi, varForce,varR, varSpeedZ, varSpeedLR, varSpeedFwd, varSpeedSpin, varCableLength, varPeriod,varDuty,varPWMEnable; // Database variable
 double phi,r,speedZ;
 
 unsigned int M1EN;	// Enable
@@ -145,13 +145,14 @@ extern int periodic(int rhdTick)
     gpio_set_value(M1NB, LOW);
   }
    
-  pwm_set_duty(abs(speedZ)*(5000000/5000)); // speed*(DUTY/MAX_JOYSTICK)
+  pwm_set_duty(roundi(abs(speedZ)*(5000000/5000))); // speed*(DUTY/MAX_JOYSTICK)
   
   
   
   // 3. Update database
   setVariable(varPhi, 0, roundi(phi));    
-  setVariable(varR, 0, roundi(r));  
+  setVariable(varR, 0, roundi(r));
+  setVariable(varDuty, 0, roundi(abs(speedZ)*(5000000/5000)));  
       
   
   
@@ -171,6 +172,12 @@ void createVariables()
   varSpeedFwd = createVariable('w',1,"speedFwd"); // Joystick speed Fwd/Back
   varSpeedSpin = createVariable('w',1,"speedSpin"); // Joystick speed spin
   varSpeedLR = createVariable('w',1,"speedLR"); // Joystick speed Left/right
+  
+  varPeriod = createVariable('r',1,"pwm_period"); 
+  varDuty = createVariable('r',1,"pwm_duty");
+  varPWMEnable = createVariable('r',1,"pwm_enable"); 
+  
+  
   
   printf(PLUGINNAME ": has created read and write variables\n");
 }
@@ -441,11 +448,13 @@ int init(void)
   // Setup PWM to zero output
   pwm_set_enable(0);
   pwm_set_period(5000000);
+  setVariable(varPeriod, 0, 5000000);
   pwm_set_duty(0);
   pwm_set_polarity(0);
   
   // Ready?? Enable motor and output
   pwm_set_enable(1);
+  setVariable(varPWMEnable, 0, 1);
   gpio_set_value(M1EN, HIGH);
   
   return result;
