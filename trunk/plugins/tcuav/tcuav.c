@@ -96,7 +96,7 @@ struct timeval tickTime;
 
 int x,y; 
 int varPhi, varForce,varR, varSpeedZ, varSpeedLR, varSpeedFwd, varSpeedSpin, varCableLength; // Database variable
-double phi,r;
+double phi,r,speedZ;
 
 unsigned int M1EN;	// Enable
 unsigned int M1NA;	// Direction
@@ -122,6 +122,7 @@ extern int periodic(int rhdTick)
   symTableElement *st = getSymtable('r');
   x = st[varForce].data[0];
   y = st[varForce].data[1];
+  speedZ = st[varSpeedZ].data[0];
   
   // 2. Calculate translate to angle
   phi = atan2(y/10000.0,x/10000.0); // Range [-pi,pi]
@@ -129,6 +130,24 @@ extern int periodic(int rhdTick)
   if(phi < 0) phi = 360+phi; // from range [-180; 180] to [0,360]
   
   r = sqrt(pow(x,2)+pow(y,2));
+  
+  // Speed Z set direction
+  if(speedZ > 0){ // Clockwise
+    gpio_set_value(M1NA, HIGH);
+    gpio_set_value(M1NB, LOW);
+  }
+  else if(speedZ < 0){ // Counter Clockwise
+    gpio_set_value(M1NA, LOW);
+    gpio_set_value(M1NB, HIGH);
+  }
+  else{ // disabled
+    gpio_set_value(M1NA, LOW);
+    gpio_set_value(M1NB, LOW);
+  }
+   
+  pwm_set_duty(speedZ*(5000000/5000)); // speed*(DYTY/MAX_JOYSTICK)
+  
+  
   
   // 3. Update database
   setVariable(varPhi, 0, roundi(phi));    
@@ -172,7 +191,6 @@ int terminate(void)
 	
   // Setup PWM to zero output
   pwm_set_enable(0);
-  pwm_set_period(5000000);
   pwm_set_duty(0);
   pwm_set_polarity(1);
   printf("PWM disabled...");
@@ -425,6 +443,10 @@ int init(void)
   pwm_set_period(5000000);
   pwm_set_duty(0);
   pwm_set_polarity(1);
+  
+  // Ready?? Enable motor and output
+  pwm_set_enable(1);
+  gpio_set_value(M1EN, HIGH);
   
   return result;
 }
