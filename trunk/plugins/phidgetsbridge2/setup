@@ -1,0 +1,14 @@
+
+echo "	* Setting up Phidget Library"
+echo "	* Unpack"
+tar -xzf libphidget_2.1.8.20140319.tar.gz
+cd libphidget_2.1.8.20140319
+echo "	* Configre"
+./configure
+echo "	* Make"
+make
+echo "	* make install"
+make install
+echo "	* Copy rules"
+cp 99-phidgets.rules /etc/udev/rules.d/
+echo "	*** Done! ***"

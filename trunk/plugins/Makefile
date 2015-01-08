@@ -12,8 +12,7 @@ PLUGINLIST := auserial gps crossbow fogyro hakocan smrdserial rflex \
               rs232linesensor powercube esm slugs usbiss sf9dof \
               joycontrol gdm8246 buspiratei2c buspiratead \
               herkulex saberandmagenc imu gps2\
-              smrarm rhdlog hexakopter gbprofibus roboteq gpsSocket \
-              fieldsteer fielddrive fieldfrontenc \
+              smrarm rhdlog hexakopter roboteq gpsSocket \
               dynamixel phidgetsbridge2 rhdlink tcuav fcs
 #Hohenheim    roboteq simstage21 gpsSocket
 # PLUGINLIST := auserial gps crossbow fogyro hakocan smrdserial rflex \

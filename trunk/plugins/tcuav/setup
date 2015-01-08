@@ -7,16 +7,32 @@
 
 clear
 
-echo ""
+echo "***************************************************************"
 echo "**** Setup for Beaglebone Back to Ground Station, RHD part ****"
+echo "***************************************************************"
 echo ""
 
-echo "* Update Repos "
+echo "*** Update Repos ***"
+echo ""
 apt-get update
 apt-get upgrade
 
-echo "* Installing packages"
+echo ""
+echo "*** Installing packages ***"
+echo ""
 apt-get install gcc g++ cmake libpng-dev ncurses-dev libsdl-dev libudev-dev libexpat-dev libreadline-dev libusb-dev lsof git -y
 
 
+echo ""
+echo "*** Installing Phidget Lib ***"
+echo ""
+cd  ../../
+./plugins/phidetsbridge2/setup
+
+
+echo ""
+echo "*** Clean make ***"
+make clean
+
+echo ""
 echo "**** Done! ****"
