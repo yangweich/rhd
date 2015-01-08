@@ -23,7 +23,7 @@ PLUGINSPATH := ../../build/lib/rhdplugin
 
 ########## Source files ##########
 #Plugin-source files
-SRC := tcuav.c
+SRC := tcuav.c gpio.c pwm.c
 
 #Plugin filename
 PLUGIN := tcuav.so.1
