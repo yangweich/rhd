@@ -22,17 +22,44 @@ echo "*** Installing packages ***"
 echo ""
 apt-get install gcc g++ cmake libpng-dev ncurses-dev libsdl-dev libudev-dev libexpat-dev libreadline-dev libusb-dev lsof git -y
 
-
 echo ""
 echo "*** Installing Phidget Lib ***"
 echo ""
 cd  ../../
 ./plugins/phidetsbridge2/setup
 
+echo ""
+echo "*** Clean make && make ***"
+echo ""
+make clean
+make
 
 echo ""
-echo "*** Clean make ***"
-make clean
+echo "*** Fix date and time ***"
+echo ""
+ntpdate -b -s -u pool.ntp.org
+
+echo ""
+echo "*** Setting up IO ***"
+echo ""
+# Create links $SLOTS and $PINS
+export SLOTS=/sys/devices/bone_capemgr.9/slots
+export PINS=/sys/kernel/debug/pinctrl/44e10800.pinmux/pins
+
+echo "Setup Device Tree"
+# Create device tree
+cd plugins/tcuav/overlay/
+./build
+# Copy device tree to firmware
+cp DM-GPIO-Test-00A0.dtbo /lib/firmware/
+
+echo am33xx_pwm > $SLOTS
+echo DM-GPIO-Test > $SLOTS
+echo bone_pwm_P9_14 > $SLOTS
+
+cat $SLOTS
+
+cd ../../../
 
 echo ""
 echo "**** Done! ****"
