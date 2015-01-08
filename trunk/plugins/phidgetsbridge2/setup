@@ -1,3 +1,9 @@
+#!/bin/bash
+#
+# Setup Beaglebone Black to Ground Station, RHD part
+# 
+# Author: Peter Savnik
+# 2015
 
 echo "	* Setting up Phidget Library"
 echo "	* Unpack"

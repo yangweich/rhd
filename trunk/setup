@@ -1,4 +1,4 @@
-
+#!/bin/bash
 #
 # Setup Beaglebone Black to Ground Station, RHD part
 # 
@@ -26,7 +26,7 @@ echo ""
 echo "*** Installing Phidget Lib ***"
 echo ""
 
-./plugins/phidetsbridge2/setup
+./plugins/phidgetsbridge2/setup
 
 echo ""
 echo "*** Clean make && make ***"
@@ -48,8 +48,11 @@ export PINS=/sys/kernel/debug/pinctrl/44e10800.pinmux/pins
 
 echo "Setup Device Tree"
 # Create device tree
-./plugins/tcuav/overlay/build
+cp plugins/tcuav/overlay
+./build
+cp ../../../
 # Copy device tree to firmware
+
 cp plugins/tcuav/overlay/DM-GPIO-Test-00A0.dtbo /lib/firmware/
 
 echo am33xx_pwm > $SLOTS
