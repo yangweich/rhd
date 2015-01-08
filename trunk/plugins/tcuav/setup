@@ -1,0 +1,16 @@
+
+#
+# Setup Beaglebone Black to Ground Station, RHD part
+# 
+# Author: Peter Savnik
+# 2015
+
+clear
+
+echo "\nSetup for Beaglebone Back to Ground Station, RHD part\n"
+
+echo "Installing packages\n"
+apt-get install gcc g++ ncurses-dev libsdl-dev libudev-dev -y
+apt-get install libexpat-dev libreadline-dev libusb-dev lsof -y
+
+echo "Done!"
