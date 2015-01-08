@@ -14,13 +14,13 @@ echo ""
 
 echo "*** Update Repos ***"
 echo ""
-#apt-get update
-#apt-get upgrade
+apt-get update
+apt-get upgrade
 
 echo ""
 echo "*** Installing packages ***"
 echo ""
-#apt-get install gcc g++ cmake libpng-dev ncurses-dev libsdl-dev libudev-dev libexpat-dev libreadline-dev libusb-dev lsof git -y
+apt-get install gcc g++ cmake libpng-dev ncurses-dev libsdl-dev libudev-dev libexpat-dev libreadline-dev libusb-dev lsof git -y
 
 echo ""
 echo "*** Installing Phidget Lib ***"
@@ -31,7 +31,7 @@ cd plugins/phidgetsbridge2
 cd ../../
 
 echo ""
-echo "*** Clean make && make ***"
+echo "*** RHD: Clean make && make ***"
 echo ""
 make clean
 make
@@ -66,6 +66,10 @@ echo bone_pwm_P9_14 > $SLOTS
 
 cat $SLOTS
 
+echo ""
+echo "*** rhd link ***"
+echo ""
+export PATH="$PATH:/home/debian/rhd/trunk/build/bin"
 
 echo ""
 echo "**** Done! ****"

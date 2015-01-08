@@ -22,7 +22,7 @@
   </server>
     
   <!-- *** Plugins Configuration *** -->
-  <plugins basepath="/home/savnik/Documents/BSc/mobotware-3.598/rhd/trunk/build/lib/rhdplugin/">
+  <plugins basepath="/home/debian/rhd/trunk/build/lib/rhdplugin/">
     <!-- Joystick Control
           Updated!! Observe the max speed setting, deadband and the "safety" parameter -->
     
