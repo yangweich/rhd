@@ -69,7 +69,7 @@ cat $SLOTS
 echo ""
 echo "*** rhd link ***"
 echo ""
-export PATH="$PATH:/home/debian/rhd/trunk/build/bin"
+echo "export PATH="\$PATH:/home/debian/rhd/trunk/build/bin"" >> .bashrc
 
 echo ""
 echo "**** Done! ****"

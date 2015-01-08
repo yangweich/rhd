@@ -145,7 +145,7 @@ extern int periodic(int rhdTick)
     gpio_set_value(M1NB, LOW);
   }
    
-  pwm_set_duty(speedZ*(5000000/5000)); // speed*(DYTY/MAX_JOYSTICK)
+  pwm_set_duty(abs(speedZ)*(5000000/5000)); // speed*(DUTY/MAX_JOYSTICK)
   
   
   
@@ -442,7 +442,7 @@ int init(void)
   pwm_set_enable(0);
   pwm_set_period(5000000);
   pwm_set_duty(0);
-  pwm_set_polarity(1);
+  pwm_set_polarity(0);
   
   // Ready?? Enable motor and output
   pwm_set_enable(1);
