@@ -122,7 +122,7 @@ extern int periodic(int rhdTick)
   symTableElement *st = getSymtable('r');
   x = st[varForce].data[0];
   y = st[varForce].data[1];
-  speedZ = st[varSpeedZ].data[0];
+  speedZ = getWriteVariable(varSpeedZ, 0);
   
   // 2. Calculate translate to angle
   phi = atan2(y/10000.0,x/10000.0); // Range [-pi,pi]
@@ -146,7 +146,7 @@ extern int periodic(int rhdTick)
   }
    
   pwm_set_duty(roundi(abs(speedZ)*(5000000/5000))); // speed*(DUTY/MAX_JOYSTICK)
-  printf("%d\n",roundi(abs(speedZ)*(5000000/5000))); 
+  printf("%d\n",speedZ); 
   
   
   // 3. Update database
