@@ -7,14 +7,16 @@
 
 clear
 
-echo "\nSetup for Beaglebone Back to Ground Station, RHD part\n"
+echo ""
+echo "**** Setup for Beaglebone Back to Ground Station, RHD part ****"
+echo ""
 
-echo "Update Repos\n"
+echo "* Update Repos "
 apt-get update
 apt-get upgrade
 
-echo "Installing packages\n"
-apt-get install gcc g++ cmake libpng-dev ncurses-dev libsdl-dev libudev-dev -y
-apt-get install libexpat-dev libreadline-dev libusb-dev lsof git -y
+echo "* Installing packages"
+apt-get install gcc g++ cmake libpng-dev ncurses-dev libsdl-dev libudev-dev libexpat-dev libreadline-dev libusb-dev lsof git -y
 
-echo "Done!"
+
+echo "**** Done! ****"
