@@ -42,6 +42,8 @@
 #include <globalfunc.h>
 
 #include "tcuav.h"
+#include "pwm.h"
+#include "gpio.h"
 
 
 ///Struct for shared parse data
@@ -95,6 +97,11 @@ struct timeval tickTime;
 int x,y; 
 int varPhi, varForce,varR, varSpeedZ, varSpeedLR, varSpeedFwd, varSpeedSpin, varCableLength; // Database variable
 double phi,r;
+
+unsigned int M1EN;	// Enable
+unsigned int M1NA;	// Direction
+unsigned int M1NB;	// Direction
+unsigned int M1CS;	// Current sense
 
 
 ////////////////////////////////////////////////////////
@@ -156,6 +163,26 @@ int terminate(void)
  
   printf(PLUGINNAME ": stopping ... ");
   
+  // echo 1/0 > value
+  gpio_set_value(M1EN, LOW);
+  gpio_set_value(M1NA, LOW);
+  gpio_set_value(M1NB, LOW);
+  gpio_set_value(M1CS, LOW);
+  printf("Values set to zero... ");
+	
+  // Setup PWM to zero output
+  pwm_set_enable(0);
+  pwm_set_period(5000000);
+  pwm_set_duty(0);
+  pwm_set_polarity(1);
+  printf("PWM disabled...");
+  
+  // release GPIO
+  gpio_unexport(M1EN);
+  gpio_unexport(M1NA);
+  gpio_unexport(M1NB);
+  gpio_unexport(M1CS);
+  printf("GPIO unexported... ");
   
   printf("[OK]\n");
   return 0;
@@ -367,6 +394,38 @@ int init(void)
     // create RHD database variables
     createVariables();
   }
+  
+  printf("Setting up Motor pin configuration\n");
+
+  M1EN = gpio_no(0,30);	// P9-11
+  M1NA = gpio_no(1,28);	// P9-12
+  M1NB = gpio_no(0,31);	// P9-13
+  M1CS = gpio_no(1,19);	// P9-15
+	
+  // echo n > export
+  gpio_export(M1EN);
+  gpio_export(M1NA);
+  gpio_export(M1NB);
+  gpio_export(M1CS);
+	
+  // Set Direction, echo in/out > direction
+  gpio_set_dir(M1EN, OUTPUT_PIN);
+  gpio_set_dir(M1NA, OUTPUT_PIN);
+  gpio_set_dir(M1NB, OUTPUT_PIN);
+  gpio_set_dir(M1CS, INPUT_PIN);
+	
+  // echo 1/0 > value
+  gpio_set_value(M1EN, LOW);
+  gpio_set_value(M1NA, LOW);
+  gpio_set_value(M1NB, LOW);
+  gpio_set_value(M1CS, LOW);
+	
+  // Setup PWM to zero output
+  pwm_set_enable(0);
+  pwm_set_period(5000000);
+  pwm_set_duty(0);
+  pwm_set_polarity(1);
+  
   return result;
 }
 
