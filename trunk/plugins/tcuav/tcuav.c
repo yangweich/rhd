@@ -449,7 +449,7 @@ int init(void)
   
   // Moter encoder
   M1ENCA = gpio_no(1,19);	// P9-16
-  M1ENCB = gpio_no(0,4);	// P9-17
+  M1ENCB = gpio_no(0,5);	// P9-17
 	
   // echo n > export
   gpio_export(M1EN);
