@@ -20,7 +20,7 @@ apt-get upgrade
 echo ""
 echo "*** Installing packages ***"
 echo ""
-apt-get install gcc g++ cmake libpng-dev ncurses-dev libsdl-dev libudev-dev libexpat-dev libreadline-dev libusb-dev lsof git xpad joystick -y
+apt-get install gcc g++ cmake libpng-dev ncurses-dev libsdl-dev libudev-dev libexpat-dev libreadline-dev libusb-dev lsof git joystick -y
 
 echo ""
 echo "*** Installing Phidget Lib ***"
@@ -70,6 +70,9 @@ echo ""
 echo "*** rhd link ***"
 echo ""
 echo "export PATH="\$PATH:/home/debian/rhd/trunk/build/bin"" >> .bashrc
+
+echo "Copy reboot setup to /etc/init.d/"
+cp setup_reboot /etc/init.d/
 
 echo ""
 echo "**** Done! ****"

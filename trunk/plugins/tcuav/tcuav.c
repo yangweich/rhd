@@ -95,13 +95,16 @@ int debugFlag = 0;
 struct timeval tickTime;
 
 int x,y; 
-int varPhi, varForce,varR, varSpeedZ, varSpeedLR, varSpeedFwd, varSpeedSpin, varCableLength, varPeriod,varDuty,varPWMEnable; // Database variable
+int varPhi, varForce,varR, varSpeedZ, varSpeedLR, varSpeedFwd, varSpeedSpin, varCableLength, varPeriod,varDuty,varPWMEnable,varEncCnt; // Database variable
 double phi,r,speedZ;
+unsigned int encCnt, encDelayed;
 
 unsigned int M1EN;	// Enable
 unsigned int M1NA;	// Direction
 unsigned int M1NB;	// Direction
 unsigned int M1CS;	// Current sense
+unsigned int M1ENCA;	// Motor encoder A
+unsigned int M1ENCB;	// Motor encoder B
 
 
 ////////////////////////////////////////////////////////
@@ -112,6 +115,7 @@ unsigned int M1CS;	// Current sense
 extern int periodic(int rhdTick)
 {
   tick = rhdTick;
+  unsigned int M1ENCA_CURRENT;
   
   // 1. Get Phidgets values
   // 2. Calculate
@@ -146,14 +150,19 @@ extern int periodic(int rhdTick)
   }
    
   pwm_set_duty(roundi(abs(speedZ)*(5000000/5000))); // speed*(DUTY/MAX_JOYSTICK)
-   
+  
+  // Encoder
+  gpio_get_value(M1ENCA, &M1ENCA_CURRENT); 
+  if(M1ENCA_CURRENT != M1ENCA){
+   encCnt++; 
+  }
   
   
   // 3. Update database
   setVariable(varPhi, 0, roundi(phi));    
   setVariable(varR, 0, roundi(r));
   setVariable(varDuty, 0, roundi(abs(speedZ)*(5000000/5000)));  
-      
+  setVariable(varEncCnt, 0, encCnt);    
   
   
   return 0;
@@ -177,7 +186,7 @@ void createVariables()
   varDuty = createVariable('r',1,"pwm_duty");
   varPWMEnable = createVariable('r',1,"pwm_enable"); 
   
-  
+  varEncCnt = createVariable('r',1,"encoder_count"); 
   
   printf(PLUGINNAME ": has created read and write variables\n");
 }
@@ -426,18 +435,27 @@ int init(void)
   M1NA = gpio_no(1,28);	// P9-12
   M1NB = gpio_no(0,31);	// P9-13
   M1CS = gpio_no(1,19);	// P9-15
+  
+  // Moter encoder
+  M1ENCA = gpio_no(1,19);	// P9-16
+  M1ENCB = gpio_no(0,4);	// P9-17
 	
   // echo n > export
   gpio_export(M1EN);
   gpio_export(M1NA);
   gpio_export(M1NB);
   gpio_export(M1CS);
+  gpio_export(M1ENCA);
+  gpio_export(M1ENCB);
+  
 	
   // Set Direction, echo in/out > direction
   gpio_set_dir(M1EN, OUTPUT_PIN);
   gpio_set_dir(M1NA, OUTPUT_PIN);
   gpio_set_dir(M1NB, OUTPUT_PIN);
   gpio_set_dir(M1CS, INPUT_PIN);
+  gpio_set_dir(M1ENCA, INPUT_PIN);
+  gpio_set_dir(M1ENCB, INPUT_PIN);
 	
   // echo 1/0 > value
   gpio_set_value(M1EN, LOW);
@@ -456,6 +474,9 @@ int init(void)
   pwm_set_enable(1);
   setVariable(varPWMEnable, 0, 1);
   gpio_set_value(M1EN, HIGH);
+  
+  encCnt = 0; // reset motor encoder counter
+  gpio_get_value(M1ENCA, &encDelayed);
   
   return result;
 }
