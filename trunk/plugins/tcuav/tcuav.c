@@ -95,7 +95,7 @@ int debugFlag = 0;
 struct timeval tickTime;
 
 int x,y; 
-int varPhi, varForce,varR, varSpeedZ, varSpeedLR, varSpeedFwd, varSpeedSpin, varCableLength, varPeriod,varDuty,varPWMEnable,varEncCnt; // Database variable
+int varPhi, varForce,varR, varSpeedZ, varSpeedLR, varSpeedFwd, varSpeedSpin, varCableLength, varPeriod,varDuty,varPWMEnable,varEncCnt,varEncA,varEncB; // Database variable
 double phi,r,speedZ;
 unsigned int encA_delayed, encB_delayed;
 int encCnt;
@@ -169,7 +169,8 @@ extern int periodic(int rhdTick)
   setVariable(varR, 0, roundi(r));
   setVariable(varDuty, 0, roundi(abs(speedZ)*(5000000/5000)));  
   setVariable(varEncCnt, 0, encCnt);    
-  
+  setVariable(varEncA, 0, encA_current);
+  setVariable(varEncB, 0, encB_current);
   
   return 0;
 }
@@ -193,6 +194,8 @@ void createVariables()
   varPWMEnable = createVariable('r',1,"pwm_enable"); 
   
   varEncCnt = createVariable('r',1,"encoder_count"); 
+  varEncA = createVariable('r',1,"encoder_a"); 
+  varEncB = createVariable('r',1,"encoder_b"); 
   
   printf(PLUGINNAME ": has created read and write variables\n");
 }
