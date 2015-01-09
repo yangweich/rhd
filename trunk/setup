@@ -20,7 +20,7 @@ apt-get upgrade
 echo ""
 echo "*** Installing packages ***"
 echo ""
-apt-get install gcc g++ cmake libpng-dev ncurses-dev libsdl-dev libudev-dev libexpat-dev libreadline-dev libusb-dev lsof git -y
+apt-get install gcc g++ cmake libpng-dev ncurses-dev libsdl-dev libudev-dev libexpat-dev libreadline-dev libusb-dev lsof git xpad joystick -y
 
 echo ""
 echo "*** Installing Phidget Lib ***"

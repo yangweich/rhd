@@ -52,13 +52,14 @@
     
     
     <!-- Joystick Control Not critical plugin for Guidebot -->
-    <joycontrol enable="true" lib="libjoycontrol.so.1" critical="false" safety="1">
+   <!-- <joycontrol enable="true" lib="libjoycontrol.so.1" critical="false" safety="1">
     <joystick port="/dev/input/js0"/>
 	<speed maxlr="5000" maxfwd="5000" maxspin="5000" maxupdown="5000" />
 	<deadband max="767" min="-767"/>
 	<control enable="true"/>
 	<scale right="1.000" left="1.000"/>
     </joycontrol>  
+    -->
     
     <rhdlog enable = "true"
             lib="rhdlog.so.1"
