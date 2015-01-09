@@ -32,6 +32,9 @@
 					    /* No PWM */
 				0x040 0x27  /* P9_15 INPUT MODE7 - M1CS */
 				
+				0x04c 0x07  /* P9_16 OUTPUT MODE7 - M1ENA */
+				0x15c 0x07  /* P9_17 OUTPUT MODE7 - M1ENB */
+				
                                /* OUTPUT  GPIO(mode7) 0x07 pulldown, 0x17 pullup, 0x?f no pullup/down */
 			       /* INPUT   GPIO(mode7) 0x27 pulldown, 0x37 pullup, 0x?f no pullup/down */
 
