@@ -157,7 +157,7 @@ extern int periodic(int rhdTick)
   gpio_get_value(M1ENCB, &encB_current);
   
   if(encA_current != encA_delayed){
-    if(encB_current != encB_delayed) encCnt--;
+    if(encB_current) encCnt--;
     else encCnt++; 
    
   }
