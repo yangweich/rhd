@@ -8,11 +8,11 @@
 # Compile all plugins
 
 #List plugin folder names here
-PLUGINLIST := auserial gps crossbow fogyro smrdserial rflex \
-              rs232linesensor powercube esm slugs usbiss sf9dof \
+PLUGINLIST := auserial crossbow smrdserial rflex \
+              esm slugs usbiss sf9dof \
               joycontrol gdm8246 buspiratei2c buspiratead \
-              herkulex saberandmagenc imu gps2\
-              smrarm rhdlog hexakopter roboteq gpsSocket \
+              saberandmagenc imu \
+              smrarm rhdlog hexakopter roboteq \
               dynamixel phidgetsbridge2 rhdlink tcuav fcs
 #Hohenheim    roboteq simstage21 gpsSocket
 # PLUGINLIST := auserial gps crossbow fogyro hakocan smrdserial rflex \
