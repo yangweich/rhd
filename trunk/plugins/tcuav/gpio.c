@@ -120,7 +120,7 @@ int gpio_get_value(unsigned int gpio, unsigned int *value)
 
 	fd = open(buf, O_RDONLY);
 	if (fd < 0) {
-		perror("gpio/get-value");
+		perror("gpio" value "/get-value");
 		return fd;
 	}
 

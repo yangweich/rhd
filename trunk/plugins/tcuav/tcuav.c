@@ -437,7 +437,7 @@ int init(void)
   M1EN = gpio_no(0,30);	// P9-11
   M1NA = gpio_no(1,28);	// P9-12
   M1NB = gpio_no(0,31);	// P9-13
-  M1CS = gpio_no(1,19);	// P9-15
+  M1CS = gpio_no(1,16);	// P9-15
   
   // Moter encoder
   M1ENCA = gpio_no(1,19);	// P9-16
