@@ -120,7 +120,8 @@ int gpio_get_value(unsigned int gpio, unsigned int *value)
 
 	fd = open(buf, O_RDONLY);
 	if (fd < 0) {
-		perror("gpio" value "/get-value");
+		perror("gpio/get-value");
+		printf("\n GPIO: %u \n", *value);
 		return fd;
 	}
 
