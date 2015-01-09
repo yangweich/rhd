@@ -97,7 +97,8 @@ struct timeval tickTime;
 int x,y; 
 int varPhi, varForce,varR, varSpeedZ, varSpeedLR, varSpeedFwd, varSpeedSpin, varCableLength, varPeriod,varDuty,varPWMEnable,varEncCnt; // Database variable
 double phi,r,speedZ;
-unsigned int encCnt, encDelayed;
+unsigned int encA_delayed, encB_delayed;
+int encCnt;
 
 unsigned int M1EN;	// Enable
 unsigned int M1NA;	// Direction
@@ -115,7 +116,7 @@ unsigned int M1ENCB;	// Motor encoder B
 extern int periodic(int rhdTick)
 {
   tick = rhdTick;
-  unsigned int encA_current;
+  unsigned int encA_current, encB_current;
   
   // 1. Get Phidgets values
   // 2. Calculate
@@ -152,13 +153,16 @@ extern int periodic(int rhdTick)
   pwm_set_duty(roundi(abs(speedZ)*(5000000/5000))); // speed*(DUTY/MAX_JOYSTICK)
   
   // Encoder
-  gpio_get_value(M1ENCA, &encA_current); 
+  gpio_get_value(M1ENCA, &encA_current);
+  gpio_get_value(M1ENCB, &encB_current);
   
-  if(encA_current != encDelayed){
-   encCnt++; 
-   encDelayed = encA_current;
+  if(encA_current != encA_delayed){
+    if(encB_current != encB_delayed) encCnt--;
+    else encCnt++; 
+   
   }
-  
+  encA_delayed = encA_current;
+  encB_delayed = encB_current;
   
   // 3. Update database
   setVariable(varPhi, 0, roundi(phi));    
@@ -480,7 +484,8 @@ int init(void)
   gpio_set_value(M1EN, HIGH);
   
   encCnt = 0; // reset motor encoder counter
-  gpio_get_value(M1ENCA, &encDelayed);
+  gpio_get_value(M1ENCA, &encA_delayed);
+  gpio_get_value(M1ENCB, &encB_delayed);
   
   return result;
 }
