@@ -157,6 +157,7 @@ extern int periodic(int rhdTick)
   gpio_get_value(M1ENCB, &encB_current);
   
   // If encoder has moved
+  // Counting all edges gives 64 counts resolution on motor shaft
   if((encA_current != encA_delayed) || (encB_current != encB_delayed)){
     // Check which pin changed
     if((encA_current == 1) && (encB_current == 1)){
