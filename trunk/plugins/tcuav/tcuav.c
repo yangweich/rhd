@@ -217,6 +217,8 @@ int terminate(void)
   gpio_unexport(M1NA);
   gpio_unexport(M1NB);
   gpio_unexport(M1CS);
+  gpio_unexport(M1ENCA);
+  gpio_unexport(M1ENCB);
   printf("GPIO unexported... ");
   
   printf("[OK]\n");
