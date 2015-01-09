@@ -155,6 +155,7 @@ extern int periodic(int rhdTick)
   gpio_get_value(M1ENCA, &M1ENCA_CURRENT); 
   if(M1ENCA_CURRENT != M1ENCA){
    encCnt++; 
+   M1ENCA = M1ENCA_CURRENT;
   }
   
   
