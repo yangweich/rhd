@@ -115,7 +115,7 @@ unsigned int M1ENCB;	// Motor encoder B
 extern int periodic(int rhdTick)
 {
   tick = rhdTick;
-  unsigned int M1ENCA_CURRENT;
+  unsigned int encA_current;
   
   // 1. Get Phidgets values
   // 2. Calculate
@@ -152,10 +152,11 @@ extern int periodic(int rhdTick)
   pwm_set_duty(roundi(abs(speedZ)*(5000000/5000))); // speed*(DUTY/MAX_JOYSTICK)
   
   // Encoder
-  gpio_get_value(M1ENCA, &M1ENCA_CURRENT); 
-  if(M1ENCA_CURRENT != M1ENCA){
+  gpio_get_value(M1ENCA, &encA_current); 
+  
+  if(encA_current != encDelayed){
    encCnt++; 
-   M1ENCA = M1ENCA_CURRENT;
+   encDelayed = encA_current;
   }
   
   
