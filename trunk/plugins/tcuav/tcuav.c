@@ -499,7 +499,7 @@ int init(void)
   pwm_set_period(5000000);
   setVariable(varPeriod, 0, 5000000);
   pwm_set_duty(0);
-  pwm_set_polarity(1);
+  pwm_set_polarity(0);
   
   // Ready?? Enable motor and output
   pwm_set_enable(1);
