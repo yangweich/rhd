@@ -156,11 +156,30 @@ extern int periodic(int rhdTick)
   gpio_get_value(M1ENCA, &encA_current);
   gpio_get_value(M1ENCB, &encB_current);
   
-  if(encA_current != encA_delayed){
-    if(encB_current) encCnt--;
-    else encCnt++; 
-   
+  // If encoder has moved
+  if((encA_current != encA_delayed) || (encB_current != encB_delayed)){
+    // Check which pin changed
+    if((encA_current == 1) && (encB_current == 1)){
+      if(encA_delayed == 1) && (encB_delayed == 0)) encCnt++;
+      else if(encA_delayed == 0) && (encB_delayed == 1)) encCnt--;
+    }
+    else if((encA_current == 0) && (encB_current == 1)){
+      if(encA_delayed == 1) && (encB_delayed == 1)) encCnt++;
+      else if(encA_delayed == 0) && (encB_delayed == 0)) encCnt--;
+    }
+    else if((encA_current == 0) && (encB_current == 0)){
+      if(encA_delayed == 0) && (encB_delayed == 1)) encCnt++;
+      else if(encA_delayed == 1) && (encB_delayed == 0)) encCnt--;
+    }
+    else if((encA_current == 1) && (encB_current == 0)){
+      if(encA_delayed == 0) && (encB_delayed == 0)) encCnt++;
+      else if(encA_delayed == 1) && (encB_delayed == 1)) encCnt--;
+    }
+    
+      
   }
+  
+  
   encA_delayed = encA_current;
   encB_delayed = encB_current;
   
