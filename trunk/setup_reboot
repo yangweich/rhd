@@ -19,7 +19,9 @@ echo ""
 echo "*** Setting up IO ***"
 echo ""
 # Create links $SLOTS and $PINS
+export SLOTS=/sys/devices/bone_capemgr.9/slots
 echo "export SLOTS=/sys/devices/bone_capemgr.9/slots"
+export PINS=/sys/kernel/debug/pinctrl/44e10800.pinmux/pins
 echo "export PINS=/sys/kernel/debug/pinctrl/44e10800.pinmux/pins"
 
 echo "Setup Device Tree"

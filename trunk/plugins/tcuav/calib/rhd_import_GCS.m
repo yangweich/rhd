@@ -1,0 +1,294 @@
+%% GROUND CONTROL STATION
+% Do the calculations as ground control
+clear all;
+close all;
+
+% CALIBRATION METODE
+% Calibrate X loadcell
+% Get data with no load in positiv x direction
+file = fopen('rhdlog_noload.txt');
+C1 = textscan(file, '%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f','Delimiter',' ','HeaderLines',25);
+fclose(file);
+
+% timevector
+t_calib = cell2mat(C1(:,1))';
+offset = t_calib(1);
+for i = 1:length(t_calib)
+    t_calib(i) = t_calib(i)-offset;
+end
+
+dataX = cell2mat(C1(:,3));
+%dataX = dataX./100;
+
+% Mean X value
+X_mean = mean(dataX);
+Xoffset = X_mean;
+
+
+dataY = cell2mat(C1(:,4));
+%dataY = dataY./100;
+
+% Mean Y value
+Y_mean = mean(dataY);
+Yoffset = Y_mean;
+
+hold on;
+plot(t_calib,dataX,'r');
+plot(t_calib,dataY,'b');
+plot([0 t_calib(end)],[Xoffset Xoffset],'g');
+plot([0 t_calib(end)],[Yoffset Yoffset],'g');
+legend('Data X','Data Y');
+
+hold off;
+
+%% Get data with load in positive x direction
+load = 1000; % [gram]
+file = fopen('rhdlog_xload.txt');
+C2 = textscan(file, '%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f','Delimiter',' ','HeaderLines',25);
+fclose(file);
+
+dataXload = cell2mat(C2(:,3));
+X_Load_mean = mean(dataXload);
+
+Kx = load/(X_Load_mean-Xoffset);
+
+%%
+% Calibration Y loadcell
+
+% Get data with load in positive x direction
+load = 1000; % [gram]
+file = fopen('rhdlog_yload.txt');
+C3 = textscan(file, '%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f','Delimiter',' ','HeaderLines',25);
+fclose(file);
+
+dataYload = cell2mat(C3(:,4));
+Y_Load_mean = mean(dataYload);
+
+Ky = load/(Y_Load_mean-Yoffset);
+
+%% LOAD data and run calibration filter
+%clear all;
+close all;
+
+% Calibration constants
+%Xoffset = 0.161557079467527;
+%Kx  = -4.271835679197036e+03;
+%Yoffset = -6.665272445220089e+02;
+%Ky = 20.245607413860206;
+%Xoffset = -439.2251;
+%Kx  = 0.5;
+%Yoffset = -666;
+%Ky = -1;
+
+
+file = fopen('rhdlog.txt');
+C = textscan(file, '%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f','Delimiter',' ','HeaderLines',25);
+fclose(file);
+
+% timevector
+t = cell2mat(C(:,1))';
+offset = t(1);
+for i = 1:length(t)
+    t(i) = t(i)-offset;
+end
+
+Ts = t(:,2)-t(:,1);
+Fs = 1/Ts;
+
+dataX = cell2mat(C(:,3)');
+
+for i = 1:length(dataX)
+    dataXcalib(i) = Kx*(dataX(i)-Xoffset);
+end
+
+dataY = cell2mat(C(:,4)');
+
+for i = 1:length(dataY)
+    dataYcalib(i) = Ky*(dataY(i)-Yoffset);
+end
+
+figure;
+hold on;
+plot(t,dataX,'red');
+plot(t,dataY,'blue');
+plot(t,dataXcalib,'green');
+plot(t,dataYcalib,'yellow');
+xlabel('Time [s]');
+ylabel('Data');
+xlim([0 12]);
+ylim([-500 1000]);
+title('Input data for GCS, raw vs calibrated');
+
+legend('X','Y','X Calibrated','Y Calibrated');
+grid on;
+hold off;
+
+mean(dataXcalib)
+%%
+hold on;
+[ax1,p1,p2] = plotyy(t,dataX,t,dataXcalib,'plot');
+[ax11,p11,p22] = plotyy(t,dataY,t,dataYcalib,'plot');
+hold off;
+
+%% 45 deg 1 kg test
+close all; 
+
+file = fopen('rhdlog_45deg1kg.txt');
+C = textscan(file, '%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f','Delimiter',' ','HeaderLines',25);
+fclose(file);
+
+% timevector
+t = cell2mat(C(:,1))';
+offset = t(1);
+for i = 1:length(t)
+    t(i) = t(i)-offset;
+end
+
+Ts = t(:,2)-t(:,1);
+Fs = 1/Ts;
+
+dataX = cell2mat(C(:,11)');
+
+dataY = cell2mat(C(:,12)');
+
+dataR = cell2mat(C(:,25)');
+dataPhi = cell2mat(C(:,24)');
+
+figure;
+hold on;
+plot(t,dataX,'red');
+plot(t,dataY,'blue');
+xlabel('Time [s]');
+ylabel('Data [g]');
+xlim([0 70]);
+ylim([710 780]);
+title('Input data for GCS, 45 deg 1kg');
+legend('X','Y');
+grid on;
+hold off;
+
+close all;
+figure;
+hold on;
+ax1 = gca;
+
+plot(t,dataR,'Color','b');
+ax2 = axes('Position',get(ax1,'Position'),...
+       'XAxisLocation','top',...
+       'YAxisLocation','right',...
+       'Color','none',...
+       'XColor','k','YColor','r');
+linkaxes([ax1 ax2],'x');
+hold on;
+plot(t,dataPhi,'Parent',ax2,'Color','r');
+set(ax1,'YColor','b');
+ylabel(ax1,'r [g]');
+ylabel(ax2,'\phi [deg]');
+ylim(ax1,[1040 1060]);
+ylim(ax2,[0 90]);
+xlim([0 72]);
+grid(ax1, 'on');
+%grid(ax2,'off');
+title('Calculated data for 45deg 1kg test');
+hold off;
+
+%% 45 deg Theta 1kg
+close all;
+
+file = fopen('rhdlog_45degTheta1kg.txt');
+C = textscan(file, '%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f','Delimiter',' ','HeaderLines',25);
+fclose(file);
+
+% timevector
+t = cell2mat(C(:,1))';
+offset = t(1);
+for i = 1:length(t)
+    t(i) = t(i)-offset;
+end
+
+Ts = t(:,2)-t(:,1);
+Fs = 1/Ts;
+
+dataR = cell2mat(C(:,25)');
+
+figure;
+hold on;
+plot(t,dataR,'b');
+plot([0 t(end)],[1000*cosd(45) 1000*cosd(45)],'r');
+legend('Messured','Exspected');
+ylim([690 710]);
+xlim([0 60]);
+grid on;
+hold off;
+
+%% 45 deg theta 1kg with cable
+
+close all;
+
+file = fopen('rhdlog_45degTheta1kg.txt');
+C = textscan(file, '%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f','Delimiter',' ','HeaderLines',25);
+fclose(file);
+file = fopen('rhdlog_45degTheta1kgCable.txt');
+C2 = textscan(file, '%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f','Delimiter',' ','HeaderLines',25);
+fclose(file);
+
+% timevector
+t = cell2mat(C(:,1))';
+offset = t(1);
+for i = 1:length(t)
+    t(i) = t(i)-offset;
+end
+
+% timevector
+t2 = cell2mat(C2(:,1))';
+offset = t2(1);
+for i = 1:length(t2)
+    t2(i) = t2(i)-offset;
+end
+
+Ts = t(:,2)-t(:,1);
+Fs = 1/Ts;
+
+dataR = cell2mat(C(:,25)');
+dataRCable = cell2mat(C2(:,25)');
+
+figure;
+hold on;
+plot(t,dataR,'b');
+plot(t2,dataRCable,'g');
+plot([0 t(end)],[1000*cosd(45) 1000*cosd(45)],'r');
+legend('Direct','Cable','Exspected');
+ylim([690 740]);
+xlim([0 50]);
+grid on;
+hold off;
+
+%% 0 deg Theta 1kg Cable
+
+close all;
+
+file = fopen('rhdlog_0degTheta1kgCable.txt');
+C = textscan(file, '%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f','Delimiter',' ','HeaderLines',25);
+fclose(file);
+
+% timevector
+t = cell2mat(C(:,1))';
+offset = t(1);
+for i = 1:length(t)
+    t(i) = t(i)-offset;
+end
+
+Ts = t(:,2)-t(:,1);
+Fs = 1/Ts;
+
+dataR = cell2mat(C(:,25)');
+
+figure;
+hold on;
+plot(t,dataR,'b');
+plot([0 t(end)],[1000 1000],'r');
+legend('Messured','Exspected');
+ylim([990 1030]);
+xlim([0 40]);
+grid on;
+hold off;

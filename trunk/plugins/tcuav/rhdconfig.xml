@@ -36,8 +36,8 @@
 	    updateTimeMs = "10"
 	    gain = "128 128 0 0"
 	    enableCh = "1 1 0 0"
-	    offset = "-435 -505"
-	    k = "4878 4529 0 0"
+	    offset = "-456 -511"
+	    k = "4786 -5134 0 0"
       >
     </phidgetsbridge2>  
     

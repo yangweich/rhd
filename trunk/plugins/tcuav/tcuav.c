@@ -46,6 +46,12 @@
 #include "gpio.h"
 
 
+// Motor Constants
+double MOTOR_WHEEL_DIAMETER = 0.047; // [m]
+int MOTOR_ENC_RES = 64; // Encoder resolution
+int MOTOR_GEAR_RATIO = 1/30;
+
+
 ///Struct for shared parse data
 typedef struct  {
     int depth; // current XML tag level
@@ -175,9 +181,7 @@ extern int periodic(int rhdTick)
     else if((encA_current == 1) && (encB_current == 0)){
       if((encA_delayed == 0) && (encB_delayed == 0)) encCnt++;
       else if((encA_delayed == 1) && (encB_delayed == 1)) encCnt--;
-    }
-    
-      
+    } 
   }
   
   
