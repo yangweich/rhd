@@ -22,7 +22,7 @@
   </server>
     
   <!-- *** Plugins Configuration *** -->
-  <plugins basepath="/home/savnik/Documents/BSc/mobotware-3.598/rhd/trunk/build/lib/rhdplugin/">
+  <plugins basepath="/home/debian/rhd/trunk/build/lib/rhdplugin/">
     <!-- Joystick Control
           Updated!! Observe the max speed setting, deadband and the "safety" parameter -->
     
@@ -35,19 +35,19 @@
 	    updateTimeMs = "10"
 	    gain = "128 128 128 0"
 	    enableCh = "1 1 1 0"
-	    offset = "-290 6050 -90 0"
-	    k = "876 870 360 1"
+	    offset = "464 -5993 104 0"
+	    k = "-510 868 4277 1"
       >
     </phidgetsbridge2>  
     
-    <rhdlink enable="true"
+    <!--<rhdlink enable="true"
       lib="rhdlink.so.1"
       debug="true"
       remoteHost="127.0.0.1"
       port="24902"
       access="w"
       >
-    </rhdlink>
+    </rhdlink>-->
     
     <!-- Flight Control System - Tether Control of UAV -->
     <fcs 

@@ -131,21 +131,25 @@ extern int periodic(int rhdTick)
   z = st[varForce].data[2];
   
   // RHD LINK
-  varRGCS = getDatabaseVariableLink('r',"r");
-  varPhiGCS = getDatabaseVariableLink('r',"r");
-  varCableLengthGCS = getDatabaseVariableLink('r',"r");
+  //varRGCS = getDatabaseVariableLink('r',"r");
+  //varPhiGCS = getDatabaseVariableLink('r',"r");
+  //varCableLengthGCS = getDatabaseVariableLink('r',"r");
   
-  symTableElement *stLink = getSymbolTableLink('r');
-  rGCS = stLink[varRGCS].data[0];
-  phiGCS = stLink[varPhiGCS].data[0];
-  cableLength = stLink[varCableLengthGCS].data[0];
+  //symTableElement *stLink = getSymbolTableLink('r');
+  //rGCS = stLink[varRGCS].data[0];
+  //phiGCS = stLink[varPhiGCS].data[0];
+  //cableLength = stLink[varCableLengthGCS].data[0];
   
   // 2. Calculate translate to angle
-  r = sqrt(pow(x/10000,2)+pow(y/10000,2)+pow(z/10000,2));
+  r = sqrt(pow(x,2)+pow(y,2)+pow(z,2));
 
   theta = acos(z/r);
+  theta = theta * (180.0/M_PI); // translate to degree
+  if(theta < 0) theta = 360.0+theta; // from range [-180; 180] to [0,360]
 
   phi = atan2(y,x);
+  phi = phi * (180.0/M_PI); // translate to degree
+  if(phi < 0) phi = 360.0+phi; // from range [-180; 180] to [0,360]
   
   // 3. Update database
   setVariable(varPhi, 0, roundi(phi));    

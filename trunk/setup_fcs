@@ -1,0 +1,78 @@
+#!/bin/bash
+#
+# Setup Beaglebone Black to Ground Station, RHD part
+# 
+# Author: Peter Savnik
+# 2015
+
+clear
+
+echo "***************************************************************"
+echo "**** Setup for Beaglebone Back to Flight Control, RHD part ****"
+echo "***************************************************************"
+echo ""
+
+echo "*** Update Repos ***"
+echo ""
+apt-get update
+apt-get upgrade
+
+echo ""
+echo "*** Installing packages ***"
+echo ""
+apt-get install gcc g++ cmake libpng-dev ncurses-dev libsdl-dev libudev-dev libexpat-dev libreadline-dev libusb-dev lsof git joystick -y
+
+echo ""
+echo "*** Installing Phidget Lib ***"
+echo ""
+
+cd plugins/phidgetsbridge2
+./setup
+cd ../../
+
+echo ""
+echo "*** RHD: Clean make && make ***"
+echo ""
+make clean
+make
+
+echo ""
+echo "*** Fix date and time ***"
+echo ""
+ntpdate -b -s -u pool.ntp.org
+
+echo ""
+echo "*** Setting up IO ***"
+echo ""
+# Create links $SLOTS and $PINS
+#export SLOTS=/sys/devices/bone_capemgr.9/slots
+#export PINS=/sys/kernel/debug/pinctrl/44e10800.pinmux/pins
+
+#echo "Setup Device Tree"
+# Create device tree
+#cd plugins/tcuav/overlay
+#./build
+#cd ../../../
+# Copy device tree to firmware
+
+#cp plugins/tcuav/overlay/DM-GPIO-Test-00A0.dtbo /lib/firmware/
+
+#echo "Enable am33xx_pwm"
+#echo am33xx_pwm > $SLOTS
+#echo "Enable DM-GPIO-Test"
+#echo DM-GPIO-Test > $SLOTS
+#echo "Enable bone_pwm_P9_14"
+#echo bone_pwm_P9_14 > $SLOTS
+
+#cat $SLOTS
+
+echo ""
+echo "*** rhd link ***"
+echo ""
+echo "export PATH="\$PATH:/home/debian/rhd/trunk/build/bin"" >> .bashrc
+
+echo "Copy reboot setup to /etc/init.d/"
+cp setup_reboot_fcs /etc/init.d/
+
+echo ""
+echo "**** Done! ****"
