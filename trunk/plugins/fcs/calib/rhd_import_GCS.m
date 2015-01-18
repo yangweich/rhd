@@ -39,16 +39,45 @@ dataZ = cell2mat(C1(:,5));
 Z_mean = mean(dataZ);
 Zoffset = Z_mean;
 
+figure;
+subplot(3,1,1);
 hold on;
-plot(t_calib,dataX,'r');
-plot(t_calib,dataY,'b');
-plot(t_calib,dataY,'m');
-plot([0 t_calib(end)],[Xoffset Xoffset],'g');
-plot([0 t_calib(end)],[Yoffset Yoffset],'g');
-plot([0 t_calib(end)],[Zoffset Zoffset],'g');
-legend('Data X','Data Y','Data Z');
-
+plot(t_calib,dataX,'Color',[153/255 0 0],'LineWidth',2);
+plot([0 t_calib(end)],[Xoffset Xoffset],'Color',[153/255 204/255 51/255],'LineWidth',2);
+ylabel('Load cell data Raw','FontName','Arial');
+xlabel('Time [s]','FontName','Arial');
+xlim([0 1]);
+%ylim([-5985 -5995]);
+legend('X','Average','Location','NorthEast');
+title('Raw Data From FCS load cells with no load','FontSize',14,'FontName','Arial');
+grid on;
 hold off;
+
+subplot(3,1,2);
+hold on;
+plot(t_calib,dataY,'Color',[51/255 102/255 203/255],'LineWidth',2);
+plot([0 t_calib(end)],[Yoffset Yoffset],'Color',[153/255 204/255 51/255],'LineWidth',2);
+grid on;
+ylabel('Load cell data Raw','FontName','Arial');
+xlabel('Time [s]','FontName','Arial');
+xlim([0 1]);
+legend('Y','Average','Location','NorthEast');
+hold off;
+
+subplot(3,1,3);
+hold on;
+plot(t_calib,dataZ,'Color','m','LineWidth',2);
+plot([0 t_calib(end)],[Zoffset Zoffset],'Color',[153/255 204/255 51/255],'LineWidth',2);
+grid on;
+ylabel('Load cell data Raw','FontName','Arial');
+xlabel('Time [s]','FontName','Arial');
+xlim([0 1]);
+legend('Z','Average','Location','NorthEast');
+grid on;
+set(gcf,'paperunits','centimeters','Paperposition',[0 0 15 15]);
+saveas(gcf,'fcs_calib.eps','psc2');
+hold off;
+
 
 %% Get data with load in positive x direction
 load = 500; % [gram]
@@ -104,7 +133,7 @@ close all;
 %Ky = -1;
 
 
-file = fopen('rhdlog.txt');
+file = fopen('rhdlog_0phi54theta600g.txt');
 C = textscan(file, '%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f','Delimiter',' ','HeaderLines',25);
 fclose(file);
 
@@ -118,35 +147,66 @@ end
 Ts = t(:,2)-t(:,1);
 Fs = 1/Ts;
 
-dataX = cell2mat(C(:,3)');
+dataX = cell2mat(C(:,4)');
 
 for i = 1:length(dataX)
     dataXcalib(i) = Kx*(dataX(i)-Xoffset);
 end
 
-dataY = cell2mat(C(:,4)');
+dataY = cell2mat(C(:,3)');
 
 for i = 1:length(dataY)
     dataYcalib(i) = Ky*(dataY(i)-Yoffset);
 end
 
-figure;
-hold on;
-plot(t,dataX,'red');
-plot(t,dataY,'blue');
-plot(t,dataXcalib,'green');
-plot(t,dataYcalib,'yellow');
-xlabel('Time [s]');
-ylabel('Data');
-xlim([0 12]);
-ylim([-500 1000]);
-title('Input data for GCS, raw vs calibrated');
+dataZ = cell2mat(C(:,5)');
 
-legend('X','Y','X Calibrated','Y Calibrated');
+for i = 1:length(dataZ)
+    dataZcalib(i) = Kz*(dataZ(i)-Zoffset);
+end
+
+figure;
+subplot(3,1,1);
+hold on;
+%plot(t,dataX,'LineWidth',1,'Color','red');
+%plot(t,dataY,'LineWidth',1,'Color','blue');
+plot(t,dataXcalib,'Color',[153/255 0 0],'LineWidth',2);
+plot([0 length(dataXcalib)],[mean(dataXcalib) mean(dataXcalib)],'Color',[153/255 204/255 51/255],'LineWidth',2);
+title('Input data for FCS calibrated, 600g load, \phi=0 deg., \theta=45 deg.','FontName','Arial','FontSize',14);
+legend('X','Average','Location','NorthEast');
+grid on;
+ylabel('Load cell [g]','FontName','Arial');
+xlim([0 70]);
+hold off;
+
+subplot(3,1,2);
+hold on;
+plot(t,dataYcalib,'Color',[51/255 102/255 204/255],'LineWidth',2);
+plot([0 length(dataYcalib)],[mean(dataYcalib) mean(dataYcalib)],'Color',[153/255 204/255 51/255],'LineWidth',2);
+xlabel('Time [s]','FontName','Arial');
+ylabel('Load cell [g]','FontName','Arial');
+xlim([0 70]);
+%ylim([-500 1000]);
+legend('Y','Average','Location','NorthEast');
 grid on;
 hold off;
 
-mean(dataXcalib)
+subplot(3,1,3);
+hold on;
+plot(t,dataZcalib,'Color','m','LineWidth',2);
+plot([0 length(dataZcalib)],[mean(dataZcalib) mean(dataZcalib)],'Color',[153/255 204/255 51/255],'LineWidth',2);
+legend('Z','Average','Location','NorthEast');
+grid on;
+ylabel('Load cell [g]','FontName','Arial');
+xlim([0 70]);
+hold off;
+
+set(gcf,'paperunits','centimeters','Paperposition',[0 0 15 15]);
+saveas(gcf,'calib_result_compare.eps','psc2')
+hold off;
+
+
+
 %%
 hold on;
 [ax1,p1,p2] = plotyy(t,dataX,t,dataXcalib,'plot');
